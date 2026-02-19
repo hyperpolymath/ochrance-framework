@@ -1,0 +1,127 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <jonathan.jewell@open.ac.uk>
+#
+# ECOSYSTEM.a2ml — Project ecosystem position for Ochrance Framework
+# Relationships, dependencies, integration points.
+
+[metadata]
+version = "0.1.0"
+last-updated = "2026-02-19"
+
+[project]
+name = "Ochrance Framework"
+purpose = "Modular verification framework for subsystem integrity using dependent types (Idris2)"
+role = "verification-framework"  # e.g. ffi-infrastructure, cli-tool, library, service
+
+[position-in-ecosystem]
+tier = "infrastructure"  # 1 | 2 | infrastructure
+description = """
+Ochrance sits at the infrastructure tier of the hyperpolymath verification stack.
+It provides the formal verification layer for operating system subsystem integrity,
+bridging the gap between dependent-type theory (Idris2) and practical system
+deployment (OSTree/Fedora Kinoite). It consumes Echidna for neural proof synthesis
+and feeds verification results to Hypatia for CI/CD intelligence.
+"""
+
+[related-projects]
+# relationship types: sibling-standard, dependency, dependent, inspiration, potential-consumer
+
+[[related-projects.project]]
+name = "echidna"
+relationship = "sibling"
+description = "Neurosymbolic theorem proving platform with 30 prover backends"
+interaction = "Ochrance dispatches proof obligations to Echidna; Echidna synthesises Idris2 proofs via neural tactics"
+url = "https://github.com/hyperpolymath/echidna"
+
+[[related-projects.project]]
+name = "verisimdb"
+relationship = "sibling"
+description = "Verisimilitude Database for vulnerability and weakness tracking"
+interaction = "Ochrance scan results feed into VeriSimDB for cross-repo weakness aggregation"
+url = "https://github.com/hyperpolymath/verisimdb"
+
+[[related-projects.project]]
+name = "panic-attacker"
+relationship = "sibling"
+description = "Security weakness scanner (panic-attack CLI)"
+interaction = "Runs security scans against Ochrance codebase; results ingested by VeriSimDB"
+url = "https://github.com/hyperpolymath/panic-attacker"
+
+[[related-projects.project]]
+name = "hypatia"
+relationship = "potential-consumer"
+description = "Neurosymbolic CI/CD intelligence platform"
+interaction = "Consumes Ochrance verification reports for CI pipeline intelligence and pattern detection"
+url = "https://github.com/hyperpolymath/hypatia"
+
+[[related-projects.project]]
+name = "eclexia"
+relationship = "sibling"
+description = "Programming language with formal verification, shadow pricing, carbon-aware scheduling"
+interaction = "Shares formal verification infrastructure; potential mutual backend integration"
+url = "https://github.com/hyperpolymath/eclexia"
+
+[[related-projects.project]]
+name = "gitbot-fleet"
+relationship = "dependent"
+description = "Bot orchestration platform (rhodibot, echidnabot, sustainabot, etc.)"
+interaction = "Ochrance triggers bot actions via repository_dispatch; bots enforce verification policies"
+url = "https://github.com/hyperpolymath/gitbot-fleet"
+
+[[related-projects.project]]
+name = "rhodium-standard-repositories"
+relationship = "sibling-standard"
+description = "RSR compliance standard for repository structure"
+interaction = "Ochrance follows RSR for repository layout, CI workflows, and metadata"
+url = "https://github.com/hyperpolymath/rhodium-standard-repositories"
+
+[integration-points]
+# External systems this project connects to
+
+[[integration-points.system]]
+name = "echidna"
+direction = "bidirectional"
+protocol = "proof-dispatch"
+description = "Dispatches Idris2 proof obligations; receives synthesised proofs and confidence scores"
+
+[[integration-points.system]]
+name = "hypatia"
+direction = "outbound"
+protocol = "logtalk-facts"
+description = "Emits verification reports as Logtalk facts for neurosymbolic CI/CD analysis"
+
+[[integration-points.system]]
+name = "gitbot-fleet"
+direction = "outbound"
+protocol = "repository_dispatch"
+description = "Triggers bot orchestration events on verification status changes"
+
+[[integration-points.system]]
+name = "ostree"
+direction = "outbound"
+protocol = "ostree-deploy"
+description = "Deployment target: verified filesystem images deployed via OSTree to Fedora Kinoite"
+
+[[integration-points.system]]
+name = "hacl-star"
+direction = "inbound"
+protocol = "c-ffi-linking"
+description = "Links against HACL* verified cryptographic implementations (future crypto module)"
+
+[what-this-is]
+descriptions = [
+  "A modular verification framework for OS subsystem integrity",
+  "An Idris2-based system for expressing and checking subsystem correctness guarantees",
+  "A bridge between dependent-type theory and practical system deployment",
+  "A framework with progressive strictness levels (Lax/Checked/Attested)",
+  "A thesis-scope proof-of-concept targeting filesystem verification on Fedora Kinoite",
+]
+
+[what-this-is-not]
+descriptions = [
+  "Not a replacement for Echidna -- Ochrance defines proof obligations, Echidna synthesises proofs",
+  "Not a general-purpose theorem prover -- it is a verification framework for subsystem integrity",
+  "Not limited to filesystems -- the framework supports any subsystem via the VerifiedSubsystem interface",
+  "Not production-ready -- currently in design phase at 5% completion",
+  "Not a runtime verification tool -- proofs are checked at compile time (Checked/Attested levels)",
+]

@@ -1,0 +1,150 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <jonathan.jewell@open.ac.uk>
+#
+# PLAYBOOK.a2ml — Operational playbook for Ochrance Framework
+# Runbooks, incident response, deployment procedures.
+
+[metadata]
+version = "0.1.0"
+last-updated = "2026-02-19"
+
+[build]
+# Build instructions for each component
+
+[build.ochrance-core]
+language = "idris2"
+command = "idris2 --build ochrance.ipkg"
+check = "idris2 --check ochrance.ipkg"
+typecheck = "idris2 --typecheck ochrance.ipkg"
+working-directory = "ochrance-core/"
+prerequisites = ["Idris2 >= 0.7.0"]
+
+[build.ffi-shims]
+language = "c"
+command = "just build-ffi"
+working-directory = "ffi/"
+prerequisites = ["GCC or Clang with C11 support"]
+notes = "Thin C shims are < 100 LOC each; compiled as shared libraries"
+
+[build.echidna-integration]
+language = "rust"
+command = "cargo build --release"
+working-directory = "integrations/echidna/"
+prerequisites = ["Rust nightly (via asdf)", "Echidna crate available"]
+
+[build.neural-synthesis]
+language = "julia"
+command = "julia --project=integrations/neural/ -e 'using Pkg; Pkg.instantiate()'"
+working-directory = "integrations/neural/"
+prerequisites = ["Julia >= 1.10"]
+
+[test]
+# Test instructions for each component
+
+[test.ochrance-core]
+command = "idris2 --check ochrance.ipkg"
+description = "Type-check all Idris2 source files (totality and type correctness)"
+working-directory = "ochrance-core/"
+
+[test.ochrance-core-properties]
+command = "just test-properties"
+description = "Run property-based tests for core framework invariants"
+working-directory = "ochrance-core/"
+
+[test.ffi-shims]
+command = "just test-ffi"
+description = "Compile and run FFI integration tests (C shims + Idris2 FFI)"
+working-directory = "ffi/"
+
+[test.echidna-integration]
+command = "cargo test"
+description = "Run Rust integration tests for Echidna backend"
+working-directory = "integrations/echidna/"
+
+[test.full-pipeline]
+command = "just test-all"
+description = "Run all tests: type-check, properties, FFI, integration"
+
+[deployment]
+method = "ostree"  # gitops | manual | ci-triggered | ostree
+target = "binary"  # container | binary | library | wasm
+
+[deployment.ostree]
+description = "Deploy verified filesystem images to Fedora Kinoite via OSTree"
+steps = [
+  "1. Build ochrance-core and filesystem module (idris2 --build)",
+  "2. Run full verification pipeline (just verify)",
+  "3. Generate attestation for Attested-level properties",
+  "4. Package verified artifacts into OSTree commit",
+  "5. Deploy to Fedora Kinoite test system via rpm-ostree",
+  "6. Run post-deployment smoke tests",
+]
+target-os = "Fedora Kinoite"
+target-runtime = "OSTree"
+notes = "OSTree deployment is thesis-scope; initial target is local Fedora Kinoite installation"
+
+[deployment.container]
+description = "Container image for CI/CD verification runs"
+runtime = "podman"
+base-image = "cgr.dev/chainguard/wolfi-base:latest"
+file = "Containerfile"
+steps = [
+  "1. podman build -f Containerfile -t ochrance .",
+  "2. podman run --rm ochrance verify",
+  "3. selur seal ochrance (optional: zero-copy IPC bridge)",
+]
+
+[incident-response]
+steps = [
+  "1. Check .machine_readable/STATE.a2ml for current status and blockers",
+  "2. Review recent commits and CI results (GitHub Actions)",
+  "3. Run just validate to check RSR compliance",
+  "4. Run just security to audit for vulnerabilities (panic-attack assail)",
+  "5. Run idris2 --check ochrance.ipkg to verify type-level soundness",
+  "6. If proof regression: check Echidna dispatch logs for confidence scores",
+  "7. If FFI issue: review C shim changes with manual security audit",
+  "8. Update STATE.a2ml with incident details and resolution",
+]
+
+[release-process]
+steps = [
+  "1. Update version in STATE.a2ml, META.a2ml, ochrance.ipkg, Justfile",
+  "2. Run just quality (format, lint, type-check)",
+  "3. Run just test-all (full test pipeline)",
+  "4. Run just validate (RSR compliance)",
+  "5. Run just security (panic-attack assail + echidna proofing)",
+  "6. Run just verify (full verification pipeline with attestation)",
+  "7. Tag release: git tag -s vX.Y.Z",
+  "8. Push: git push && git push --tags",
+  "9. Push mirrors: git push gitlab main && git push gitlab --tags",
+  "10. Update CHANGELOG.md with release notes",
+]
+
+[justfile-recipes]
+# Expected Justfile recipes for Ochrance
+recipes = [
+  { name = "build", description = "Build all components (idris2, C, Rust, Julia)" },
+  { name = "test-all", description = "Run all tests across all components" },
+  { name = "test-properties", description = "Run property-based tests for core invariants" },
+  { name = "test-ffi", description = "Run FFI integration tests" },
+  { name = "check", description = "Type-check Idris2 source (idris2 --check)" },
+  { name = "verify", description = "Run full verification pipeline with attestation" },
+  { name = "quality", description = "Format, lint, type-check all source" },
+  { name = "security", description = "Run panic-attack assail + dependency audit" },
+  { name = "validate", description = "Validate RSR compliance" },
+  { name = "validate-rsr", description = "Alias for validate" },
+  { name = "build-ffi", description = "Compile C FFI shims" },
+  { name = "container-build", description = "Build Podman container image" },
+  { name = "container-push", description = "Push container to registry" },
+  { name = "deploy-ostree", description = "Deploy verified artifacts to OSTree" },
+]
+
+[monitoring]
+# What to monitor for ongoing health
+checks = [
+  { name = "idris2-typecheck", frequency = "every-commit", description = "Ensure all Idris2 code type-checks with totality" },
+  { name = "proof-regression", frequency = "every-commit", description = "No proof obligations should regress (Checked/Attested -> Lax)" },
+  { name = "ffi-audit", frequency = "weekly", description = "Review C FFI shims for memory safety issues" },
+  { name = "dependency-audit", frequency = "weekly", description = "Run panic-attack assail for security weaknesses" },
+  { name = "echidna-confidence", frequency = "every-proof-change", description = "Verify Echidna confidence scores meet threshold (>= 0.85)" },
+]

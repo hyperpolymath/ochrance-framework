@@ -1,0 +1,211 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <jonathan.jewell@open.ac.uk>
+
+# ⚠️ STOP - CRITICAL READING REQUIRED
+
+**THIS FILE MUST BE READ FIRST BY ALL AI AGENTS**
+
+## WHAT IS THIS?
+
+This is the AI manifest for **Ochránce** (Czech: *protector, defender, guardian*; IPA: /ˈoxraːnt͡sɛ/).
+Repository: `ochrance-framework`
+
+Ochránce is a **modular verification framework** for subsystem integrity using
+**dependent types** (Idris2). The filesystem module is the reference implementation;
+memory, network, and crypto modules are planned as future work.
+
+It declares:
+- Canonical file locations (where things MUST be, and nowhere else)
+- Critical invariants (rules that must NEVER be violated)
+- Repository structure and organization
+
+## CANONICAL LOCATIONS (UNIVERSAL RULE)
+
+### Machine-Readable Metadata: `.machine_readable/` ONLY
+
+These 6 a2ml files MUST exist in `.machine_readable/` directory ONLY:
+1. **STATE.a2ml** - Project state, progress, blockers
+2. **META.a2ml** - Architecture decisions, governance
+3. **ECOSYSTEM.a2ml** - Position in ecosystem, relationships
+4. **AGENTIC.a2ml** - AI agent interaction patterns
+5. **NEUROSYM.a2ml** - Neurosymbolic integration config
+6. **PLAYBOOK.a2ml** - Operational runbook
+
+**CRITICAL:** If ANY of these files exist in the root directory, this is an ERROR.
+
+### Bot Directives: `.machine_readable/bot_directives/` ONLY
+
+Bot-specific instructions for automated agents. Roles:
+- git-ops-bot - Git operations
+- quality-bot - Code quality
+- deps-bot - Dependency updates
+- docs-bot - Documentation
+- integration-bot - Integration
+- completion-bot - Task completion
+
+### Contractiles: `.machine_readable/contractiles/` ONLY
+
+Policy enforcement contracts:
+- k9 - Operational constraints (Nickel)
+- dust - Rollback and recovery semantics
+- lust - Future intent and roadmap direction
+- must - Required invariants and validations
+- trust - Cryptographic verification (Haskell)
+
+### Agent Instructions
+
+- `.claude/CLAUDE.md` - Claude-specific patterns
+- `0-AI-MANIFEST.a2ml` - THIS FILE (universal entry point)
+
+## CORE INVARIANTS
+
+1. **No state file duplication** - Root must NOT contain STATE.a2ml, META.a2ml, etc.
+2. **Single source of truth** - `.machine_readable/` is authoritative
+3. **No stale metadata** - If root state files exist, they are OUT OF DATE
+4. **License consistency** - All code PMPL-1.0-or-later
+5. **Author attribution** - Always "Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>"
+6. **Naming** - Always "Ochránce" (with diacritic) in prose, "ochrance" in code/paths
+7. **L4 policy boundary** - System integrity constraints ONLY (never spelling, style, or content validation)
+8. **Totality** - All Idris2 parser and verification functions MUST be proven total
+9. **Thin C FFI** - C shims are <300 lines, syscalls only, no business logic
+10. **Progressive strictness** - All verification supports Lax/Checked/Attested modes
+
+## REPOSITORY STRUCTURE
+
+```
+ochrance-framework/
+├── 0-AI-MANIFEST.a2ml              # THIS FILE (start here)
+├── AI.a2ml                         # Extended AI manifest
+├── README.adoc                     # Project overview
+├── TOPOLOGY.md                     # Architecture diagram + completion dashboard
+├── ochrance.ipkg                   # Idris2 package file
+├── Justfile                        # Build recipes
+│
+├── ochrance-core/                  # Idris2 source (all verification logic)
+│   ├── Framework/                  # Core framework
+│   │   ├── Interface.idr           # VerifiedSubsystem interface
+│   │   ├── Proof.idr               # Proof witnesses (Lax/Checked/Attested)
+│   │   ├── Error.idr               # q/p/z semantic diagnostics
+│   │   └── Progressive.idr         # Progressive strictness modes
+│   ├── A2ML/                       # Attestation & Audit Markup Language
+│   │   ├── Types.idr               # AST types
+│   │   ├── Lexer.idr               # Tokenizer (total)
+│   │   ├── Parser.idr              # Parser (total)
+│   │   ├── Validator.idr           # Semantic validation
+│   │   └── Serializer.idr          # Manifest generation
+│   ├── Filesystem/                 # Reference implementation (thesis scope)
+│   │   ├── Types.idr               # FSState, FSManifest
+│   │   ├── Merkle.idr              # Merkle tree (total)
+│   │   ├── Verify.idr              # Verification logic
+│   │   └── Repair.idr              # Linear type repair
+│   └── FFI/                        # Foreign function interfaces
+│       └── Echidna.idr             # ECHIDNA neural synthesis (future)
+│
+├── ffi/                            # Foreign code (non-Idris2)
+│   └── c/                          # Thin C shims (~200 lines)
+│       ├── nvme_shim.c             # NVMe syscall wrappers
+│       └── nvme_shim.h             # Header
+│
+├── modules/                        # Module documentation
+│   ├── filesystem/README.md        # Reference impl docs
+│   ├── memory/DESIGN.md            # Future: Idris2 + Rust
+│   ├── network/DESIGN.md           # Future: Idris2 + eBPF
+│   └── crypto/DESIGN.md            # Future: link to HACL*
+│
+├── integrations/                   # External system integrations
+│   ├── echidna/                    # ECHIDNA neural proof synthesis
+│   └── ostree/                     # Fedora Kinoite OSTree hooks
+│       └── hooks/
+│
+├── tools/                          # CLI tooling
+│   └── ochrance-cli/               # Command-line interface
+│
+├── docs/                           # Documentation
+│   ├── ARCHITECTURE.md             # L0-L5 layer specification
+│   ├── A2ML-SPEC.md                # Formal A2ML grammar (EBNF)
+│   ├── FFI-CONTRACT.md             # Idris2 ↔ C interface contract
+│   ├── L4-POLICIES.md              # Valid policy examples + anti-patterns
+│   ├── ROADMAP.md                  # Implementation phases (Q1-Q4 2026)
+│   ├── REBRAND-SUMMARY.md          # Sentinel → Ochránce rebrand rationale
+│   ├── WHITEPAPER.md               # Full academic white paper
+│   └── IMPLEMENTATION-GUIDE.md     # Claude Code week-by-week guide
+│
+├── benchmarks/                     # Performance benchmarks
+├── training/                       # Neural synthesis training data
+│   └── corpus/                     # Idris2 proof corpus
+│       ├── totality/
+│       ├── correctness/
+│       └── security/
+│
+├── tests/                          # Test suite
+├── examples/                       # Usage examples
+│
+└── .machine_readable/              # ALL machine-readable content
+    ├── STATE.a2ml
+    ├── META.a2ml
+    ├── ECOSYSTEM.a2ml
+    ├── AGENTIC.a2ml
+    ├── NEUROSYM.a2ml
+    ├── PLAYBOOK.a2ml
+    ├── bot_directives/
+    └── contractiles/
+```
+
+## KEY TECHNOLOGIES
+
+| Component | Language | Purpose |
+|-----------|----------|---------|
+| Core framework | Idris2 | Dependent type verification, totality proofs |
+| C shims | C | Thin NVMe syscall wrappers (libnvme) |
+| ECHIDNA backend | Rust | Idris2 prover integration (13th backend) |
+| Neural synthesis | Julia | Proof candidate generation (Transformer) |
+| A2ML | Idris2 | Attestation & Audit Markup Language parser |
+
+## VERIFICATION MODES
+
+| Mode | Overhead | Use Case | Proof Level |
+|------|----------|----------|-------------|
+| Lax | <1% | Development | Structure only |
+| Checked | ~2-5% | Production | Hash verification |
+| Attested | ~10% | Safety-critical | Full dependent type proofs |
+
+## SESSION STARTUP CHECKLIST
+
+✅ Read THIS file (0-AI-MANIFEST.a2ml) first
+✅ Understand naming: "Ochránce" in prose, "ochrance" in code
+✅ Understand canonical location: `.machine_readable/` (state, bots, contractiles)
+✅ Know the invariants (no state file duplication, totality, thin FFI, etc.)
+✅ Read `.machine_readable/STATE.a2ml` for current status
+✅ Read `.machine_readable/AGENTIC.a2ml` for interaction patterns
+✅ Read docs/ARCHITECTURE.md for layer definitions
+
+## LIFECYCLE HOOKS
+
+### on-enter (Session Start)
+
+1. Read and acknowledge this manifest
+2. Read `.machine_readable/STATE.a2ml`
+3. Check for blockers
+4. State understanding of canonical locations and naming conventions
+
+### on-exit (Session End)
+
+1. Update `.machine_readable/STATE.a2ml` if changes made
+2. Document new blockers
+3. Summarize outcomes
+4. Ensure all Idris2 files compile: `idris2 --check`
+
+## ATTESTATION PROOF
+
+After reading this file, demonstrate understanding by stating:
+
+**"I have read the Ochránce AI manifest. All machine-readable content (state files, bot directives, contractiles) is located in `.machine_readable/` ONLY. The project uses Idris2 dependent types with thin C FFI shims. L4 policies enforce system integrity only. All parser/verification functions must be total."**
+
+## META
+
+- **Format Version:** 1.0.0
+- **Created:** 2026-02-06
+- **Updated:** 2026-02-19
+- **Maintained By:** Jonathan D.A. Jewell (hyperpolymath)
+- **License:** PMPL-1.0-or-later
+- **Protocol:** https://github.com/hyperpolymath/0-ai-gatekeeper-protocol

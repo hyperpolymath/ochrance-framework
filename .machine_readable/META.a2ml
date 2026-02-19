@@ -1,0 +1,118 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <jonathan.jewell@open.ac.uk>
+#
+# META.a2ml — Project meta-level information for Ochrance Framework
+# Architecture decisions, design rationale, governance.
+
+[metadata]
+version = "0.1.0"
+last-updated = "2026-02-19"
+
+[project-info]
+type = "binary"  # library | binary | monorepo | service | website
+languages = ["idris2", "c", "rust", "julia"]
+license = "PMPL-1.0-or-later"
+author = "Jonathan D.A. Jewell (hyperpolymath)"
+email = "jonathan.jewell@open.ac.uk"
+repository = "https://github.com/hyperpolymath/ochrance-framework"
+
+[architecture-decisions]
+# ADR format: status = proposed | accepted | deprecated | superseded | rejected
+
+[[architecture-decisions.adr]]
+id = "ADR-001"
+title = "Use Idris2 for core framework"
+status = "accepted"
+date = "2026-02-19"
+rationale = """
+Idris2 provides dependent types with first-class support for totality checking,
+linear types (via QTT), and compile-time proof obligations. These features are
+essential for a verification framework where the framework itself must be provably
+correct. Alternatives considered: Agda (no runtime code generation), Lean 4 (less
+mature FFI), F* (Effect-heavy paradigm less suited to subsystem modelling).
+"""
+
+[[architecture-decisions.adr]]
+id = "ADR-002"
+title = "Replace Zig FFI with thin C shims"
+status = "accepted"
+date = "2026-02-19"
+rationale = """
+While the hyperpolymath ABI/FFI standard specifies Idris2 ABI + Zig FFI, Ochrance
+uses thin C shims instead of Zig for the FFI layer. Rationale: Idris2's existing
+FFI support targets C directly (via scheme backend). Adding a Zig layer would
+introduce unnecessary complexity for syscall wrappers and OS API bindings. The C
+shims are minimal (< 100 LOC each), auditable, and generated from the Idris2 ABI
+definitions. Zig remains available for future modules requiring cross-compilation.
+"""
+
+[[architecture-decisions.adr]]
+id = "ADR-003"
+title = "Framework-first design with pluggable modules"
+status = "accepted"
+date = "2026-02-19"
+rationale = """
+Ochrance is a framework, not a monolithic verifier. The core defines the
+VerifiedSubsystem interface, Proof witness types, and the verification protocol.
+Concrete subsystem modules (filesystem, memory, network, crypto) implement the
+interface independently. This enables: (1) independent module development and
+testing, (2) third-party module creation, (3) selective deployment (verify only
+the subsystems that matter for a given deployment target), (4) thesis-scoped
+implementation (filesystem module) without blocking the framework design.
+"""
+
+[[architecture-decisions.adr]]
+id = "ADR-004"
+title = "Progressive strictness (Lax/Checked/Attested)"
+status = "accepted"
+date = "2026-02-19"
+rationale = """
+Three strictness levels allow progressive adoption. Lax: runtime checks only,
+no proofs required (development/debugging). Checked: compile-time type checking
+enforced, proofs required for critical properties. Attested: full formal
+verification with machine-checked proofs and cryptographic attestation of
+verification outcomes. This mirrors how real systems adopt verification
+incrementally rather than all-at-once.
+"""
+
+[[architecture-decisions.adr]]
+id = "ADR-005"
+title = "Add Idris2 backend to Echidna"
+status = "proposed"
+date = "2026-02-19"
+rationale = """
+Echidna currently supports 30 prover backends but lacks native Idris2 integration
+beyond basic type checking. Adding a dedicated Idris2 backend would enable:
+(1) direct dispatch of Ochrance proof obligations to Echidna's trust pipeline,
+(2) neural proof synthesis for Idris2 tactics via Julia ML layer,
+(3) cross-checking Idris2 proofs against other dependent type provers (Agda, Lean,
+Coq) via Echidna's portfolio solving. This creates a bidirectional integration
+where Ochrance generates proof obligations and Echidna synthesises proofs.
+"""
+
+[development-practices]
+build-tool = "just"
+container-runtime = "podman"
+ci-platform = "github-actions"
+package-manager = "idris2"  # idris2 (ipkg) for core, cargo for Rust components
+test-framework = "idris2-test"  # Idris2 built-in test runner
+documentation-format = "adoc"  # AsciiDoc
+
+[design-rationale]
+# Key design decisions and their reasoning
+core-insight = """
+Operating system subsystems (filesystems, memory managers, network stacks) make
+implicit correctness guarantees that are never formally verified in production.
+Ochrance provides a framework for expressing these guarantees as dependent types
+and verifying them at the boundary between trusted and untrusted code.
+"""
+thesis-scope = """
+The thesis focuses on the filesystem module as a reference implementation,
+demonstrating that dependent-type verification of subsystem integrity is practical
+for real-world deployment targets (Fedora Kinoite via OSTree).
+"""
+naming = """
+Ochrance (Czech: protector/defender/guardian) reflects the framework's role as a
+guardian of subsystem integrity. The accent on the 'a' (Ochrance) is preserved
+in documentation but omitted in code identifiers for ASCII compatibility.
+"""

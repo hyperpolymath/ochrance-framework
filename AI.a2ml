@@ -1,0 +1,41 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <jonathan.jewell@open.ac.uk>
+
+# AI Assistant Instructions — Ochránce Framework
+
+## Repository Focus
+
+- **Ochránce** is a modular verification framework for subsystem integrity using dependent types (Idris2).
+- Always refer to the project as "Ochránce" (with diacritic) in prose and "ochrance" in code/paths.
+- All machine-readable content lives under `.machine_readable/` — state files (a2ml), bot directives, and contractiles.
+- Prefer to keep generated files out of source control, and regenerate them with the documented commands before committing.
+
+## Critical Rules
+
+1. All Idris2 parser and verification functions MUST be `total`.
+2. C FFI shims are <300 lines — syscalls only, never business logic.
+3. L4 Policy Governor enforces system integrity ONLY (never spelling, formatting, or content validation).
+4. Progressive strictness: all verification supports Lax/Checked/Attested modes.
+5. No unsafe Idris2 patterns: no `believe_me`, no `assert_total`, no `unsafePerformIO`.
+
+## Workflow
+
+1. Read `0-AI-MANIFEST.a2ml` FIRST for canonical locations and invariants.
+2. Inspect `.machine_readable/STATE.a2ml` for blockers and next actions.
+3. Respect constraints in `.machine_readable/AGENTIC.a2ml`.
+4. After editing, update STATE with outcomes and commit with a concise, imperative message.
+
+## Build Commands
+
+```
+just build          # Build Idris2 + C shims
+just check          # Type-check all modules
+just check-totality # Verify total annotations
+just test           # Run test suite
+just rsr-check      # Check RSR compliance
+```
+
+## Delivery Promises
+
+- Mention in summaries whether STATE, `.machine_readable/contractiles/`, or `.machine_readable/bot_directives/` changed.
+- Keep this file in sync with the repository's status; update it if the governance changes.

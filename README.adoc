@@ -1,0 +1,194 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <jonathan.jewell@open.ac.uk>
+
+= Ochránce — Verified Subsystem Integrity Framework
+Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>
+v0.1.0, 2026-02-19
+:toc: left
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+
+== About
+
+**Ochránce** (Czech: _protector, defender, guardian_; IPA: /ˈoxraːnt͡sɛ/) is a modular
+verification framework for subsystem integrity using **dependent types** (Idris2).
+
+Unlike existing tools (ZFS checksums, OSTree Merkle trees, Windows SFC), Ochránce provides:
+
+* **Dependent type proofs** — verification backed by mathematical certainty, not just hash comparison
+* **Progressive strictness** — trade security for performance dynamically (Lax/Checked/Attested)
+* **Semantic diagnostics** — q/p/z error format tells you _what_ broke, _why_ it matters, and _what's affected_
+* **Modular design** — the same `VerifiedSubsystem` interface works for filesystems, memory, networks, and crypto
+* **Neurosymbolic integration** — ECHIDNA neural proof synthesis accelerates formal verification
+
+== Architecture
+
+[source]
+----
+┌─────────────────────────────────────────┐
+│ L5: Idris2 TUI (q/p/z reporting)        │
+├─────────────────────────────────────────┤
+│ L4: Idris2 Policy (system integrity)    │
+├─────────────────────────────────────────┤
+│ L3: Idris2 Repair (linear types)        │
+├─────────────────────────────────────────┤
+│ L2: Idris2 Proofs (VerifiedState)       │
+│     A2ML Parser (total, proven)         │
+├─────────────────────────────────────────┤
+│ L1: C Shims (~200 lines)                │
+│     nvme_read_smart/block/write         │
+├─────────────────────────────────────────┤
+│ L0: Hardware (NVMe, TPM, RISC-V PMP)    │
+└─────────────────────────────────────────┘
+----
+
+=== Core Interface
+
+[source,idris]
+----
+interface VerifiedSubsystem (sub : Type) where
+  State : Type
+  Manifest : Type
+  verify : State -> Manifest -> Either Error (Proof State Manifest)
+  repair : (corrupt : State) -> Snapshot -> IO State
+  attest : State -> IO Manifest
+----
+
+=== Modules
+
+[cols="1,1,2,1"]
+|===
+|Module |Languages |Purpose |Status
+
+|Filesystem
+|Idris2 + C
+|NVMe block verification, Merkle trees, A2ML manifests
+|**In Progress** (thesis scope)
+
+|Memory
+|Idris2 + Rust
+|Virtual memory integrity, page table verification
+|Designed (future work)
+
+|Network
+|Idris2 + eBPF
+|Packet integrity, audit trails, intrusion detection
+|Designed (future work)
+
+|Crypto
+|Idris2 → HACL*
+|Verified cryptographic primitives (linking only)
+|Designed (future work)
+|===
+
+== A2ML (Attestation & Audit Markup Language)
+
+A2ML is the manifest format describing verified system state:
+
+[source]
+----
+@manifest {
+  version = "0.1.0"
+  subsystem = "filesystem"
+  timestamp = "2026-02-19T12:00:00Z"
+}
+
+@refs {
+  root : blake3:a3f5d8e2b1c4...
+  block_000 : sha256:7b2e9f3a...
+}
+
+@attestation {
+  signature = base64:iJKLMNOP...
+  witness = base64:QRSTUVWX...
+}
+----
+
+See `docs/A2ML-SPEC.md` for the formal grammar.
+
+== Progressive Strictness
+
+[cols="1,1,2,2"]
+|===
+|Mode |Overhead |Proof Level |Use Case
+
+|Lax
+|<1%
+|Structure only
+|Development, fast iteration
+
+|Checked
+|~2-5%
+|Hash verification
+|Production workloads
+
+|Attested
+|~10%
+|Full dependent type proofs
+|Safety-critical (medical, automotive, aerospace)
+|===
+
+== ECHIDNA Integration
+
+Ochránce integrates with link:https://github.com/hyperpolymath/echidna[ECHIDNA]
+(Extensible Cognitive Hybrid Intelligence for Deductive Neural Assistance) for
+AI-powered proof generation:
+
+. ECHIDNA's neural synthesizer generates proof candidates
+. Idris2 backend (13th prover) verifies correctness
+. Valid proofs are used by Ochránce for filesystem verification
+
+== Build
+
+=== Requirements
+
+* Idris2 0.7.0+ (dependent type compiler)
+* GCC or Clang (C shims compilation)
+* just (build automation)
+
+=== Quick Start
+
+[source,bash]
+----
+# Build the framework
+just build
+
+# Run tests
+just test
+
+# Type-check all modules
+just check
+----
+
+== Research
+
+This work supports the thesis:
+
+> **"Dependent Types for Verified Systems: A Framework for Subsystem Integrity"**
+>
+> Jonathan D.A. Jewell, The Open University
+
+=== Publications
+
+* "Ochránce: A Neurosymbolic Approach to Filesystem Verification" (target: ICFP)
+* "Progressive Verification with Ochránce" (target: SOSP)
+* "Neural Proof Synthesis for Ochránce" (target: PLDI)
+
+== Naming
+
+**Ochránce** honors Czech computing and formal methods traditions (Prague school of
+logic). The name was chosen deliberately to push non-English technical terminology and
+give recognition to non-Anglophone linguistic communities in technology.
+
+* **In prose**: Ochránce (with diacritic)
+* **In code/paths**: ochrance (ASCII-safe)
+* **Pronunciation**: OH-khran-tseh
+
+== License
+
+PMPL-1.0-or-later (Palimpsest License)
+
+== Author
+
+Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>

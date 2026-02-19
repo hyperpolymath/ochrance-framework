@@ -1,0 +1,92 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <jonathan.jewell@open.ac.uk>
+#
+# AGENTIC.a2ml — AI agent constraints and capabilities for Ochrance Framework
+# Defines what AI agents can and cannot do in this repository.
+
+[metadata]
+version = "0.1.0"
+last-updated = "2026-02-19"
+
+[agent-permissions]
+can-edit-source = true
+can-edit-tests = true
+can-edit-docs = true
+can-edit-config = true
+can-create-files = true
+can-edit-proofs = false  # Idris2 proofs must be human-reviewed before merge
+can-edit-ffi = false     # C FFI shims require manual security review
+
+[agent-constraints]
+# What AI agents must NOT do in this repository:
+constraints = [
+  "Never use believe_me in Idris2 code (banned unsafe pattern)",
+  "Never use assert_total in Idris2 code (banned unsafe pattern)",
+  "Never use assert_smaller in Idris2 code (banned unsafe pattern)",
+  "Never use unsafePerformIO in Idris2 code (banned unsafe pattern)",
+  "Never introduce unsafe{} blocks in Rust code without SAFETY comments",
+  "Never commit secrets or credentials",
+  "Never use banned languages (TypeScript, Python, Go, etc.)",
+  "Never place state files in repository root (must be in .machine_readable/)",
+  "Never use AGPL license (use PMPL-1.0-or-later)",
+  "Never weaken StrictnessLevel (do not change Attested to Checked or Lax)",
+  "Never bypass proof obligations with postulates or Admitted-equivalent",
+  "Never modify C FFI shims without flagging for security review",
+]
+
+[agents]
+# AI agents that interact with this repository
+
+[agents.claude]
+role = "primary-development"
+model = "claude-opus-4-6"
+capabilities = [
+  "Code generation (Idris2, Rust, C, Julia)",
+  "Architecture design and ADR drafting",
+  "Documentation and specification writing",
+  "Test scaffolding and property specification",
+  "CI/CD workflow configuration",
+  "RSR compliance enforcement",
+]
+limitations = [
+  "Cannot verify Idris2 totality (requires idris2 compiler)",
+  "Cannot run proof obligations (requires Echidna dispatch)",
+  "Cannot deploy to OSTree (requires system access)",
+]
+
+[agents.echidna]
+role = "proof-synthesis"
+type = "neurosymbolic-prover"
+capabilities = [
+  "Neural proof synthesis for Idris2 tactics",
+  "Cross-prover verification of proof obligations",
+  "Confidence scoring via 5-level trust hierarchy",
+  "Portfolio solving across 30 prover backends",
+]
+interaction = "Ochrance dispatches proof obligations via structured format; Echidna returns synthesised proofs with confidence metadata"
+
+[agents.hypatia]
+role = "ci-intelligence"
+type = "neurosymbolic-cicd"
+capabilities = [
+  "Pattern detection in verification reports",
+  "Fleet dispatch to gitbot-fleet bots",
+  "VeriSimDB integration for weakness tracking",
+]
+interaction = "Hypatia scans Ochrance on commit; emits Logtalk facts for downstream analysis"
+
+[automation-hooks]
+on-enter = "Read 0-AI-MANIFEST.a2ml, then .machine_readable/STATE.a2ml"
+on-exit = "Update .machine_readable/STATE.a2ml with session outcomes"
+on-commit = "Run just validate-rsr"
+on-proof-change = "Flag for human review; do not auto-merge proof modifications"
+on-ffi-change = "Flag for security review; C shims must be manually audited"
+
+[review-gates]
+# Changes that require human approval before merge
+gates = [
+  { path = "ochrance-core/src/**/*.idr", gate = "proof-review", reason = "Core Idris2 proofs must be human-verified" },
+  { path = "ffi/**/*.c", gate = "security-review", reason = "C FFI shims are attack surface" },
+  { path = "modules/*/src/**/*.idr", gate = "proof-review", reason = "Module proofs must be human-verified" },
+  { path = ".machine_readable/**", gate = "metadata-review", reason = "SCM file changes affect all agents" },
+]
