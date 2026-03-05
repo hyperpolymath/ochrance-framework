@@ -268,3 +268,8 @@ spdx-check:
         fi
     done
     [ "$missing" -eq 0 ] && echo "All files have SPDX headers." || echo "$missing files missing SPDX."
+
+# [AUTO-GENERATED] Multi-arch / RISC-V target
+build-riscv:
+	@echo "Building for RISC-V..."
+	cross build --target riscv64gc-unknown-linux-gnu
