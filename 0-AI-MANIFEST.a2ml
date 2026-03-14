@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: PMPL-1.0-or-later
-# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <jonathan.jewell@open.ac.uk>
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 
 # ⚠️ STOP - CRITICAL READING REQUIRED
 
@@ -63,7 +63,7 @@ Policy enforcement contracts:
 2. **Single source of truth** - `.machine_readable/` is authoritative
 3. **No stale metadata** - If root state files exist, they are OUT OF DATE
 4. **License consistency** - All code PMPL-1.0-or-later
-5. **Author attribution** - Always "Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>"
+5. **Author attribution** - Always "Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"
 6. **Naming** - Always "Ochránce" (with diacritic) in prose, "ochrance" in code/paths
 7. **L4 policy boundary** - System integrity constraints ONLY (never spelling, style, or content validation)
 8. **Totality** - All Idris2 parser and verification functions MUST be proven total

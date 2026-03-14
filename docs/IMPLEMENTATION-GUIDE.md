@@ -1,5 +1,5 @@
 <!-- SPDX-License-Identifier: PMPL-1.0-or-later -->
-<!-- Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <jonathan.jewell@open.ac.uk> -->
+<!-- Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk> -->
 
 # Ochrance Framework -- Claude Code Implementation Guide
 
@@ -893,7 +893,7 @@ formatDiagnostic diag =
 name = "ochrance-echidna"
 version = "0.1.0"
 edition = "2021"
-authors = ["Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>"]
+authors = ["Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"]
 description = "ECHIDNA Idris2 prover backend for Ochrance"
 license = "PMPL-1.0-or-later"
 
@@ -1129,7 +1129,7 @@ pub fn verify_with_idris2(proof_source: &str) -> Result<bool, String> {
 
 name = "OchranceNeural"
 uuid = "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-authors = ["Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>"]
+authors = ["Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"]
 version = "0.1.0"
 
 [deps]

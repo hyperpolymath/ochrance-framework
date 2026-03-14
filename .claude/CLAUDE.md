@@ -5,7 +5,7 @@
 **Name**: Ochránce (Czech: protector, defender, guardian)
 **Pronunciation**: /ˈoxraːnt͡sɛ/ (OH-khran-tseh)
 **Repository**: ochrance-framework
-**Author**: Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>
+**Author**: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 **License**: PMPL-1.0-or-later
 
 ## Naming Convention (CRITICAL)

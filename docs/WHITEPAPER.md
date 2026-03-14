@@ -1,11 +1,11 @@
 <!-- SPDX-License-Identifier: PMPL-1.0-or-later -->
-<!-- Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <jonathan.jewell@open.ac.uk> -->
+<!-- Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk> -->
 
 # Neurosymbolic Filesystem Verification: Integrating ECHIDNA with Ochrance
 
 **Author:** Jonathan D.A. Jewell, The Open University
 
-**Contact:** jonathan.jewell@open.ac.uk
+**Contact:** j.d.a.jewell@open.ac.uk
 
 **Date:** February 2026
 

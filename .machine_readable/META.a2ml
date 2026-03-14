@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: PMPL-1.0-or-later
-# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <jonathan.jewell@open.ac.uk>
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 #
 # META.a2ml — Project meta-level information for Ochrance Framework
 # Architecture decisions, design rationale, governance.
@@ -13,7 +13,7 @@ type = "binary"  # library | binary | monorepo | service | website
 languages = ["idris2", "c", "rust", "julia"]
 license = "PMPL-1.0-or-later"
 author = "Jonathan D.A. Jewell (hyperpolymath)"
-email = "jonathan.jewell@open.ac.uk"
+email = "j.d.a.jewell@open.ac.uk"
 repository = "https://github.com/hyperpolymath/ochrance-framework"
 
 [architecture-decisions]

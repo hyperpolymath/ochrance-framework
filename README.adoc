@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: PMPL-1.0-or-later
-// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <jonathan.jewell@open.ac.uk>
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 
 = Ochránce — Verified Subsystem Integrity Framework
-Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>
+Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 v0.1.0, 2026-02-19
 :toc: left
 :toclevels: 3
@@ -191,4 +191,4 @@ PMPL-1.0-or-later (Palimpsest License)
 
 == Author
 
-Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>
+Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
