@@ -8,6 +8,9 @@ set shell := ["bash", "-uc"]
 set dotenv-load := true
 set positional-arguments := true
 
+# Import auto-generated contractile recipes
+import? "contractile.just"
+
 # Project metadata
 project := "ochrance-framework"
 version := "0.1.0"
