@@ -175,8 +175,8 @@ ochrance-framework/
 ✅ Understand naming: "Ochránce" in prose, "ochrance" in code
 ✅ Understand canonical location: `.machine_readable/` (state, bots, contractiles)
 ✅ Know the invariants (no state file duplication, totality, thin FFI, etc.)
-✅ Read `.machine_readable/STATE.a2ml` for current status
-✅ Read `.machine_readable/AGENTIC.a2ml` for interaction patterns
+✅ Read `.machine_readable/6a2/STATE.a2ml` for current status
+✅ Read `.machine_readable/6a2/AGENTIC.a2ml` for interaction patterns
 ✅ Read docs/ARCHITECTURE.md for layer definitions
 
 ## LIFECYCLE HOOKS
@@ -184,13 +184,13 @@ ochrance-framework/
 ### on-enter (Session Start)
 
 1. Read and acknowledge this manifest
-2. Read `.machine_readable/STATE.a2ml`
+2. Read `.machine_readable/6a2/STATE.a2ml`
 3. Check for blockers
 4. State understanding of canonical locations and naming conventions
 
 ### on-exit (Session End)
 
-1. Update `.machine_readable/STATE.a2ml` if changes made
+1. Update `.machine_readable/6a2/STATE.a2ml` if changes made
 2. Document new blockers
 3. Summarize outcomes
 4. Ensure all Idris2 files compile: `idris2 --check`
