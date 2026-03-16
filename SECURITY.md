@@ -4,7 +4,7 @@
 ============================================================================
 TEMPLATE INSTRUCTIONS (delete this block before publishing)
 ============================================================================
-Replace all {{PLACEHOLDER}} values with your information:
+Replace all ochrance-framework values with your information:
   Ochrance Framework     - Your project name
   hyperpolymath            - GitHub username or org (e.g., hyperpolymath)
   ochrance-framework             - Repository name
