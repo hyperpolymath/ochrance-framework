@@ -1,3 +1,4 @@
+# RSR-compliant .gitignore
 # SPDX-License-Identifier: PMPL-1.0-or-later
 # ochrance-framework .gitignore
 
@@ -105,3 +106,7 @@ sync_report*.txt
 /training/models/
 /training/checkpoints/
 *.bson
+
+
+# Machine-readable locks
+.machine_readable/.locks/
