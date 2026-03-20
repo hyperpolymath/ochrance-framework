@@ -185,6 +185,25 @@ give recognition to non-Anglophone linguistic communities in technology.
 * **In code/paths**: ochrance (ASCII-safe)
 * **Pronunciation**: OH-khran-tseh
 
+== Related Repositories
+
+=== ochrance (Reference Implementation)
+
+The link:https://github.com/hyperpolymath/ochrance[ochrance] repository is the **reference
+implementation** of the Filesystem module listed above. It contains the working Idris2 +
+Zig FFI implementation of NVMe block verification, Merkle trees, and A2ML manifest parsing
+(~80% complete).
+
+This framework repo (`ochrance-framework`) defines the broader modular architecture —
+the `VerifiedSubsystem` interface and the four planned subsystem modules (Filesystem,
+Memory, Network, Crypto). The two repos are **complementary**, not duplicates:
+
+* **ochrance** — concrete, working filesystem verification (thesis scope)
+* **ochrance-framework** — abstract framework for all four subsystems (~10% complete)
+
+As additional subsystem modules reach implementation stage, they will follow the same
+pattern: a dedicated repo implementing the `VerifiedSubsystem` interface defined here.
+
 == License
 
 PMPL-1.0-or-later (Palimpsest License)
