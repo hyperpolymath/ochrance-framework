@@ -22,7 +22,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - language: javascript-typescript
+          # Idris2/docs repo - no JS/TS present, scan workflows only
+          - language: actions
             build-mode: none
 
     steps:
