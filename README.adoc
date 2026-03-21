@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: PMPL-1.0-or-later
 // Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 
+[WARNING]
+====
+**ARCHIVED** -- This repo has been superseded by https://github.com/hyperpolymath/ochrance[ochrance]. All valuable content (Progressive.idr, Containerfile, flake.nix) has been merged there.
+====
+
 = Ochránce — Verified Subsystem Integrity Framework
 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 v0.1.0, 2026-02-19
