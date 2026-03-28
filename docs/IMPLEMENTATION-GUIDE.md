@@ -1566,7 +1566,7 @@ cerro-torre sign ochrance-framework:latest
 `IDRIS2_PACKAGE_PATH` environment variable includes the build directory:
 
 ```bash
-export IDRIS2_PACKAGE_PATH=/var/mnt/eclipse/repos/ochrance-framework/src/core/build/ttc
+export IDRIS2_PACKAGE_PATH=/var$REPOS_DIR/ochrance-framework/src/core/build/ttc
 ```
 
 **Problem:** `Linear variable used non-linearly`
@@ -1618,7 +1618,7 @@ sudo ochrance verify /dev/nvme0n1
 sudo make install  # in modules/filesystem/shim/
 
 # Option 2: Set LD_LIBRARY_PATH
-export LD_LIBRARY_PATH=/var/mnt/eclipse/repos/ochrance-framework/modules/filesystem/shim:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/var$REPOS_DIR/ochrance-framework/modules/filesystem/shim:$LD_LIBRARY_PATH
 ```
 
 **Problem:** `libnvme.h: No such file or directory`

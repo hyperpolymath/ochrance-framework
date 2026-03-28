@@ -96,7 +96,7 @@ respect the Czech orthography.
 | Context | Form | Example |
 |---------|------|---------|
 | Repository name | `ochrance-framework` | `github.com/hyperpolymath/ochrance-framework` |
-| Directory paths | `ochrance-framework` | `/var/mnt/eclipse/repos/ochrance-framework/` |
+| Directory paths | `ochrance-framework` | `/var$REPOS_DIR/ochrance-framework/` |
 | Package names | `ochrance` | `ochrance-core`, `ochrance-shim` |
 | Code identifiers | `Ochrance` | `OchranceConfig`, `OchranceVerifier` |
 | Module names | `Ochrance` | `Ochrance.Core`, `Ochrance.Merkle` |
