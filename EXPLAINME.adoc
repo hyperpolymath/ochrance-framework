@@ -1,25 +1,224 @@
 // SPDX-License-Identifier: PMPL-1.0-or-later
-= Ochránce — Verified Subsystem Integrity Framework — Show Me The Receipts
+// SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+= Ochránce Framework — Verified Subsystem Integrity — Show Me The Receipts
 :toc:
 :icons: font
 
-The README makes claims. This file backs them up.
+Ochránce (Czech: _protector, defender, guardian_; pronounced OH-khran-tseh)
+is a modular verification framework for subsystem integrity using dependent types
+(Idris2). This file backs up the claims in the README. Note: the active
+implementation repository is https://github.com/hyperpolymath/ochrance[ochrance];
+this `ochrance-framework` repo defines the abstract multi-subsystem interface
+that the implementation and future subsystem modules implement against.
+
+== Claim: Dependent type proofs — verification backed by mathematical certainty
 
 [quote, README]
 ____
-Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+Dependent type proofs — verification backed by mathematical certainty, not just
+hash comparison. The same VerifiedSubsystem interface works for filesystems,
+memory, networks, and crypto.
 ____
 
-== File Map
+The core contract is defined in
+`ochrance-core/Ochrance/Framework/Interface.idr`. The `VerifiedSubsystem`
+interface is parameterised by the subsystem implementation type `sub` and
+requires three total functions: `verify` (pure, returns `Either OchranceError
+(VerificationProof mode SubState SubManifest)`), `repair` (IO-bound, restores
+from a snapshot), and `attest` (IO-bound, generates a fresh manifest from live
+state). The `VerificationProof` type in `Framework/Proof.idr` is a GADT
+indexed by `VerificationMode` (Lax / Checked / Attested) — this means the
+compiler enforces that a Lax proof cannot be used where an Attested proof is
+required. All parser and verification functions carry `%default total`,
+enforcing Idris2's totality checker. The `verifyOrRepair` pipeline in
+`Interface.idr` composes these: attempt verify, on failure execute repair,
+re-verify.
+
+**Caveat:** The framework is ~10% implemented. The `Filesystem` module
+(in `ochrance-core/Ochrance/Filesystem/`) is the furthest along (NVMe block
+verification, Merkle trees, A2ML manifest parsing) and lives in the companion
+https://github.com/hyperpolymath/ochrance[ochrance] repo at ~80% complete.
+The `Memory`, `Network`, and `Crypto` module directories are skeletal — designed
+but not yet implemented. Do not use this framework repo as evidence of
+four working subsystems; it is an interface contract and partial scaffold.
+
+- Core interface: `ochrance-core/Ochrance/Framework/Interface.idr`
+- Proof types: `ochrance-core/Ochrance/Framework/Proof.idr`
+- Progressive modes: `ochrance-core/Ochrance/Framework/Progressive.idr`
+- Error types: `ochrance-core/Ochrance/Framework/Error.idr`
+- A2ML parser: `ochrance-core/Ochrance/A2ML/Parser.idr` (total, proven)
+
+== Claim: Progressive strictness — trade security for performance dynamically
+
+[quote, README]
+____
+Progressive strictness — trade security for performance dynamically
+(Lax/Checked/Attested). Lax: <1% overhead, structure only. Checked: ~2-5%,
+hash verification. Attested: ~10%, full dependent type proofs.
+____
+
+`Progressive.idr` defines `VerificationMode` as a data type with three
+constructors. The `verify` function in `VerifiedSubsystem` takes `mode` as
+an explicit argument, and `VerificationProof` is indexed by that mode — so
+the proof you get back carries its verification level in its type. A Lax
+verification produces a `StructureValid` witness; a Checked verification
+adds hash comparison (BLAKE3); an Attested verification produces a full
+dependent-type proof requiring hash match plus cryptographic attestation
+signature. This typing prevents silent mode downgrade: code expecting
+`VerificationProof Attested s m` will not type-check when handed a
+`VerificationProof Lax s m`.
+
+**Caveat:** The overhead figures (<1%, ~2-5%, ~10%) are design targets
+documented in the README, not yet benchmarked against a running implementation
+in this repo. Benchmark evidence will come from the `ochrance` implementation
+repo once the Filesystem module reaches completion.
+
+- Mode definition: `ochrance-core/Ochrance/Framework/Progressive.idr`
+- Proof GADT: `ochrance-core/Ochrance/Framework/Proof.idr`
+
+== Critical Invariants (never violate these)
+
+[IMPORTANT]
+====
+. **No `believe_me`, `assert_total`, or `unsafePerformIO`** anywhere in Idris2 source.
+  The value of the framework is the proofs — unsafe escapes destroy that value.
+. **All parser and verification functions must carry `total` annotation.**
+  The A2ML parser in `Ochrance/A2ML/Parser.idr` is proven total; any extension
+  must preserve this.
+. **C shims are syscall wrappers ONLY.** `ffi/c/` contains <300 lines of C.
+  No business logic, no state, no allocation beyond what the syscall needs.
+. **L4 boundary is system integrity only.** The Policy Governor enforces
+  signed binary authentication, access control, and authorisation — never
+  spelling, formatting, or content validation of user data.
+. **A2ML files only in `.machine_readable/`.** Never place STATE, META,
+  ECOSYSTEM, AGENTIC, NEUROSYM, or PLAYBOOK files in the repo root.
+====
+
+== Dogfooded Across The Account
 
 [cols="1,2"]
 |===
-| Path | What's There
+| Technology | Also Used In
 
-| `ffi/` | Foreign function interface
-| `test(s)/` | Test suite
+| **Idris2 for formal proofs** | https://github.com/hyperpolymath/stapeln[stapeln]
+  (crypto proofs, 14/26 proven), https://github.com/hyperpolymath/ephapax[ephapax]
+  (linear type proofs, 27 Qed / 3 Admitted), Groove protocol ABI definitions
+| **Thin C FFI pattern (Idris2 → C)** | https://github.com/hyperpolymath/ochrance[ochrance]
+  (NVMe libnvme shims), https://github.com/hyperpolymath/stapeln[stapeln]
+  (crypto FFI)
+| **ECHIDNA neurosymbolic integration** | https://github.com/hyperpolymath/echidna[echidna]
+  is the neural theorem-proving platform; Ochránce is a primary consumer
+  of its Idris2 backend (13th prover)
+| **A2ML manifest format** | A2ML is the hyperpolymath-standard attestation
+  and audit format; used in https://github.com/hyperpolymath/a2ml-showcase[a2ml-showcase],
+  https://github.com/hyperpolymath/standards[standards], and all RSR repos
 |===
 
-== Questions?
+== File Map
 
-Open an issue or reach out directly — happy to explain anything in more detail.
+[cols="1,3"]
+|===
+| Path | What's There
+
+| `ochrance-core/Ochrance/Framework/Interface.idr`
+| The `VerifiedSubsystem` interface: `verify`, `repair`, `attest`, and the
+  `verifyOrRepair` resilience pipeline. All functions total.
+
+| `ochrance-core/Ochrance/Framework/Proof.idr`
+| `VerificationProof` GADT, indexed by `VerificationMode`. The type-level
+  guarantee that proof level is tracked and enforced.
+
+| `ochrance-core/Ochrance/Framework/Progressive.idr`
+| `VerificationMode` data type (Lax / Checked / Attested) and overhead
+  documentation.
+
+| `ochrance-core/Ochrance/Framework/Error.idr`
+| `OchranceError` type with `q/p/z` semantic diagnostic fields:
+  q = what happened, p = why it matters, z = impact zone.
+
+| `ochrance-core/Ochrance/Framework/Types.idr`
+| Shared type aliases, `Snapshot` type, `Witness` record.
+
+| `ochrance-core/Ochrance/Framework/Repair.idr`
+| Repair strategy types and composition helpers.
+
+| `ochrance-core/Ochrance/Framework/Merkle.idr`
+| Merkle tree types for manifest representation.
+
+| `ochrance-core/Ochrance/Framework/Verify.idr`
+| Verification pipeline helpers.
+
+| `ochrance-core/Ochrance/A2ML/Lexer.idr`
+| Total lexer for the A2ML manifest format. Produces token stream.
+
+| `ochrance-core/Ochrance/A2ML/Parser.idr`
+| Total parser for A2ML. Accepts `@manifest`, `@refs`, `@attestation` blocks.
+  Proven total — no partial functions.
+
+| `ochrance-core/Ochrance/A2ML/Serializer.idr`
+| Serializes typed A2ML AST back to text.
+
+| `ochrance-core/Ochrance/A2ML/Validator.idr`
+| Validates A2ML semantic constraints (timestamp format, hash prefixes).
+
+| `ochrance-core/Ochrance/Filesystem/`
+| Filesystem subsystem module (skeletal; full implementation in ochrance repo).
+
+| `ochrance-core/Ochrance/` `{crypto,memory,network}/`
+| Future subsystem modules. Design documented, not yet implemented.
+
+| `ffi/c/`
+| Thin C shims for NVMe syscalls via libnvme. <300 lines total. No business
+  logic. Called by the Filesystem module's Idris2 FFI declarations.
+
+| `modules/`
+| Module-level documentation: `filesystem/`, `memory/`, `network/`, `crypto/`
+  architecture notes.
+
+| `docs/`
+| Architecture overview, A2ML spec (`docs/A2ML-SPEC.md`), white paper,
+  thesis research notes.
+
+| `ochrance.ipkg`
+| Idris2 package manifest. Declares all module paths for the compiler.
+
+| `Justfile`
+| Build recipes: `just build` (Idris2 + C shims), `just check` (type-check),
+  `just check-totality` (verify total annotations), `just test`, `just bench`.
+
+| `Containerfile`
+| Chainguard-based container for the framework tools.
+
+| `.machine_readable/6a2/`
+| A2ML checkpoint files: STATE, META, ECOSYSTEM, AGENTIC, NEUROSYM, PLAYBOOK.
+|===
+
+== Checking It
+
+[source,bash]
+----
+# Type-check all modules
+just check
+
+# Verify totality annotations are present
+just check-totality
+
+# Build Idris2 + C shims
+just build
+
+# Run test suite
+just test
+
+# Check SPDX headers
+just spdx-check
+----
+
+== Relationship to `ochrance`
+
+This framework repo (`ochrance-framework`) defines the abstract architecture:
+the `VerifiedSubsystem` interface and the four planned subsystem modules.
+The https://github.com/hyperpolymath/ochrance[ochrance] repo is the concrete
+reference implementation of the Filesystem module (~80% complete). They are
+complementary: `ochrance` proves the approach works for one subsystem;
+`ochrance-framework` provides the interface that future subsystem implementations
+(Memory, Network, Crypto) will conform to.
