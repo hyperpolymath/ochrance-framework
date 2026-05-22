@@ -1,4 +1,4 @@
-<!-- SPDX-License-Identifier: PMPL-1.0-or-later -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
 <!-- Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk> -->
 
 # FFI Contract: Idris2 + C Foreign Function Interface
@@ -225,7 +225,7 @@ A single header file `ochrance_shim.h` declares all three functions:
 
 ```c
 /* ochrance_shim.h -- Ochrance L1 C shim interface
- * SPDX-License-Identifier: PMPL-1.0-or-later
+ * SPDX-License-Identifier: MPL-2.0
  * Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath)
  */
 

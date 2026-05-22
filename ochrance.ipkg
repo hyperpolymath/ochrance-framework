@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: PMPL-1.0-or-later
+-- SPDX-License-Identifier: MPL-2.0
 -- Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 --
 -- Ochrance Framework - Verified Subsystem Integrity Framework
@@ -9,7 +9,7 @@ package ochrance
 version = "0.1.0"
 authors = "Jonathan D.A. Jewell"
 brief   = "Ochránce: Verified Subsystem Integrity Framework"
-license = "PMPL-1.0-or-later"
+license = "MPL-2.0"
 
 sourcedir = "ochrance-core"
 

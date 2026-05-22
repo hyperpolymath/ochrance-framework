@@ -1,4 +1,4 @@
-<!-- SPDX-License-Identifier: PMPL-1.0-or-later -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
 <!-- Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk> -->
 
 # Ochrance Framework -- Implementation Roadmap
@@ -237,7 +237,7 @@ and prepare for publication.
 |-------------|--------|
 | MSc thesis submission to The Open University | Planned |
 | Conference paper submission (target: USENIX Security or IEEE S&P) | Planned |
-| Open-source release of Ochrance framework (PMPL-1.0-or-later) | Planned |
+| Open-source release of Ochrance framework (MPL-2.0) | Planned |
 | Blog post: "Building a Neurosymbolic Filesystem Verifier" | Planned |
 
 ---
