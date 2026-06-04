@@ -3,17 +3,14 @@
 
 ||| Ochrance.A2ML.Validator — Semantic Integrity Enforcement.
 |||
-||| While the parser ensures syntactic correctness, this module performs 
-||| deep semantic validation to guarantee the manifest is meaningful and 
+||| While the parser ensures syntactic correctness, this module performs
+||| deep semantic validation to guarantee the manifest is meaningful and
 ||| cryptographically sound.
 |||
 ||| VALIDATION AXES:
-||| 1. **Hashing**: Verifies that digest lengths match their algorithms 
-|||    (e.g. BLAKE3 must be 64 hex characters).
-||| 2. **Completeness**: Ensures mandatory fields in the `@manifest` 
-//!    header are present and non-empty.
-||| 3. **Consistency**: Checks for dangling references and conflicting 
-//!    policy rules.
+||| 1. Hashing: digest lengths match their algorithms (e.g. BLAKE3 = 64 hex chars).
+||| 2. Completeness: mandatory @manifest fields are present and non-empty.
+||| 3. Consistency: references are well-formed hex digests.
 
 module Ochrance.A2ML.Validator
 
@@ -36,27 +33,65 @@ data ValidationError : Type where
   InvalidVersion     : (version : String) -> ValidationError
   UnknownPolicyMode  : (mode : String) -> ValidationError
 
-||| AGGREGATION: Collects all detected errors into a list. 
-||| This avoids the "fail-fast" problem, allowing the developer to see 
-||| all issues in a single pass.
+||| AGGREGATION: Collects all detected errors into a list, so the developer
+||| sees every issue in a single pass (rather than failing fast).
 public export
 ValidationResult : Type
 ValidationResult = Either (List ValidationError) ()
 
 --------------------------------------------------------------------------------
--- Validation Logic
+-- Per-axis checks
 --------------------------------------------------------------------------------
 
-||| SEMANTIC AUDIT: Ingests a complete manifest and recursively validates 
-||| every section.
+||| Expected hex-digest length (characters) for each algorithm.
+expectedLength : HashAlgo -> Nat
+expectedLength SHA256 = 64
+expectedLength SHA384 = 96
+expectedLength SHA512 = 128
+expectedLength BLAKE3 = 64
+
+||| A digest must be hexadecimal and of its algorithm's expected length.
+validateHash : Hash -> List ValidationError
+validateHash h =
+  let ds = unpack h.digest
+      n  = length ds
+      lenErr = if n == expectedLength h.algo
+                 then []
+                 else [InvalidHashLength h.algo (expectedLength h.algo) n]
+      fmtErr = if all isHexDigit ds then [] else [InvalidHashFormat h.digest]
+  in lenErr ++ fmtErr
+
+public export
+validateManifestSection : ManifestSection -> List ValidationError
+validateManifestSection ms =
+  (if ms.name    == "" then [MissingField "manifest" "name"]    else [])
+  ++ (if ms.version == "" then [MissingField "manifest" "version"] else [])
+
+public export
+validateRefsSection : RefsSection -> List ValidationError
+validateRefsSection rs = concatMap (validateHash . refHash) rs.entries
+
+public export
+validateAttestationSection : AttestationSection -> List ValidationError
+validateAttestationSection (MkAttestationSection a) = validateHash a.hash
+
+public export
+validatePolicySection : PolicySection -> List ValidationError
+validatePolicySection _ = []  -- a parsed PolicyMode is always well-formed
+
+--------------------------------------------------------------------------------
+-- Whole-manifest audit
+--------------------------------------------------------------------------------
+
+||| SEMANTIC AUDIT: Ingests a complete manifest and validates every section,
+||| aggregating all detected errors.
 public export
 validate : Manifest -> ValidationResult
 validate m =
-  let manifestErrs    = validateManifestSection m.manifest
-      refsErrs        = maybe [] validateRefsSection m.refs
-      attestationErrs = maybe [] validateAttestationSection m.attestation
-      policyErrs      = maybe [] validatePolicySection m.policy
-      allErrs         = manifestErrs ++ refsErrs ++ attestationErrs ++ policyErrs
+  let allErrs = validateManifestSection m.manifest
+             ++ maybe [] validateRefsSection m.refs
+             ++ maybe [] validateAttestationSection m.attestation
+             ++ maybe [] validatePolicySection m.policy
   in case allErrs of
        [] => Right ()
        es => Left es
