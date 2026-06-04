@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MPL-2.0
-// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
-
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 /// nvme_shim.h — Thin C shim for NVMe device access.
 ///
 /// Provides minimal wrappers around Linux NVMe ioctls for use by the
