@@ -17,6 +17,7 @@
 module Ochrance.Filesystem.Merkle
 
 import Data.List
+import Data.Nat
 
 %default total
 
@@ -139,8 +140,8 @@ record MerkleProof where
 ||| @return      True if the proof is valid
 public export
 verifyMerkleProof : MerkleProof -> (expectedRoot : String) -> Bool
-verifyMerkleProof proof expectedRoot =
-  let computedRoot = foldl applyStep proof.leafHash proof.path
+verifyMerkleProof mp expectedRoot =
+  let computedRoot = foldl applyStep mp.leafHash mp.path
   in computedRoot == expectedRoot
   where
     ||| Apply a single proof step: combine with sibling hash.

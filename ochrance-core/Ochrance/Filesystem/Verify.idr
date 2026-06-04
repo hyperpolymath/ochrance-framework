@@ -25,6 +25,7 @@ import Ochrance.Framework.Progressive
 import Ochrance.Filesystem.Types
 import Ochrance.Filesystem.Merkle
 import Data.Vect
+import Decidable.Equality
 
 %default total
 
@@ -90,31 +91,14 @@ verifyChecked st manifest =
   case verifyLax st manifest of
     Left err => Left err
     Right structOk =>
-      let computedRoot = rootHash (buildFSMerkle st)
-          expectedRoot = manifest.rootHash
-          computedHash = MkHash SHA256 (cast (unpack computedRoot))
-          expectedHash = MkHash SHA256 (cast (unpack expectedRoot))
-      in if allHashesMatch st manifest
-         then
-           -- The hashes match; we construct the proof witness.
-           -- In a full implementation, this equality proof would be
-           -- derived from the actual byte-level comparison.
-           -- TODO: Replace with real hash equality proof once FFI is wired.
-           case decEq computedRoot expectedRoot of
-             Yes prf =>
-               let cv = MkHash SHA256 (cast (unpack computedRoot))
-                   ev = MkHash SHA256 (cast (unpack expectedRoot))
-               in Right (MkHashesMatch structOk cv cv Refl)
-             No _ =>
-               -- Hashes matched as strings but not decidably equal — treat as match.
-               -- This branch should be unreachable if allHashesMatch returned True.
-               let cv = MkHash SHA256 (cast (unpack computedRoot))
-               in Right (MkHashesMatch structOk cv cv Refl)
-         else Left (hashError
-           "blocks"
-           manifest.rootHash
-           computedRoot
-           (FullSubsystem "filesystem"))
+      let computed = MkHashValue (rootHash (buildFSMerkle st))
+          expected = MkHashValue manifest.rootHash
+      in case decEq computed expected of
+           -- The witness carries a *genuine* proof `computed = expected`,
+           -- produced by decidable equality — not a placeholder.
+           Yes prf => Right (MkHashesMatch structOk computed expected prf)
+           No _ => Left (hashError "merkle-root" manifest.rootHash
+                           (rootHash (buildFSMerkle st)) (FullSubsystem "filesystem"))
 
 --------------------------------------------------------------------------------
 -- Attested verification

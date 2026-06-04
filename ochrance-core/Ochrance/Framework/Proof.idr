@@ -7,16 +7,35 @@
 ||| verification engine. It implements a "Progressive Assurance" model 
 ||| where proofs can be strengthened as more evidence is gathered.
 |||
-//! LEVELS OF ASSURANCE:
-//! 1. **StructureValid**: Lax mode. Checks that fields exist and have correct types.
-//! 2. **HashesMatch**: Checked mode. Proves cryptographic equality (computed == expected).
-//! 3. **FullyAttested**: Attested mode. Verifies all domain-specific invariants.
+||| LEVELS OF ASSURANCE:
+||| 1. StructureValid: Lax mode. Checks that fields exist and have correct types.
+||| 2. HashesMatch: Checked mode. Proves cryptographic equality (computed == expected).
+||| 3. FullyAttested: Attested mode. Verifies all domain-specific invariants.
 
 module Ochrance.Framework.Proof
 
 import Ochrance.Framework.Progressive
+import Decidable.Equality
 
 %default total
+
+--------------------------------------------------------------------------------
+-- Hash Evidence
+--------------------------------------------------------------------------------
+
+||| A cryptographic digest used as verification evidence. Carrying it as a
+||| concrete type (rather than `String`) lets the witnesses below demand a
+||| genuine propositional equality between a computed and an expected hash.
+public export
+record HashValue where
+  constructor MkHashValue
+  digest : String
+
+public export
+DecEq HashValue where
+  decEq (MkHashValue a) (MkHashValue b) = case decEq a b of
+    Yes prf   => Yes (cong MkHashValue prf)
+    No contra => No (\eq => contra (cong digest eq))
 
 --------------------------------------------------------------------------------
 -- Integrity Models
@@ -39,8 +58,19 @@ data HashesMatch : (state : Type) -> (manifest : Type) -> Type where
                -> (structureOk : StructureValid s m)
                -> (computed : HashValue)
                -> (expected : HashValue)
-               -> (hashProof : computed = expected) // FORMAL EQUALITY PROOF
+               -> (hashProof : computed = expected)  -- formal equality proof
                -> HashesMatch s m
+
+||| WITNESS: Attested Verification.
+||| Confirms hash authenticity *and* domain attestation: a timestamp and a
+||| verified signature flag, layered on top of the `HashesMatch` evidence.
+public export
+data FullyAttested : (state : Type) -> (manifest : Type) -> Type where
+  MkFullyAttested : {0 s : Type} -> {0 m : Type}
+                 -> (hashesOk : HashesMatch s m)
+                 -> (timestamp : Nat)
+                 -> (signatureValid : Bool)
+                 -> FullyAttested s m
 
 --------------------------------------------------------------------------------
 -- Proof Orchestration
@@ -64,3 +94,10 @@ strengthen : StructureValid s m
           -> (prf : computed = expected)
           -> HashesMatch s m
 strengthen sv c e prf = MkHashesMatch sv c e prf
+
+||| PROMOTION: Layer domain attestation (a timestamp and a verified-signature
+||| flag) onto a hash-verified proof to obtain a fully attested one.
+public export
+fullyAttest : HashesMatch s m -> (timestamp : Nat) -> (signatureValid : Bool)
+           -> FullyAttested s m
+fullyAttest h t s = MkFullyAttested h t s
