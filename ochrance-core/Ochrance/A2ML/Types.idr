@@ -26,7 +26,45 @@ data TokenKind : Type where
   TK_IDENT       : String -> TokenKind
   TK_STRING      : String -> TokenKind
   TK_HASH        : String -> TokenKind
+  TK_NUMBER      : Nat -> TokenKind
+  TK_BOOL        : Bool -> TokenKind
+  TK_LBRACE      : TokenKind -- {
+  TK_RBRACE      : TokenKind -- }
+  TK_COLON       : TokenKind -- :
+  TK_EQUALS      : TokenKind -- =
   TK_EOF         : TokenKind
+
+||| SOURCE LOCATION: 1-based line and column, for precise diagnostics.
+public export
+record SourceLoc where
+  constructor MkSourceLoc
+  line   : Nat
+  column : Nat
+
+public export
+Eq TokenKind where
+  TK_MANIFEST    == TK_MANIFEST    = True
+  TK_REFS        == TK_REFS        = True
+  TK_ATTESTATION == TK_ATTESTATION = True
+  TK_POLICY      == TK_POLICY      = True
+  (TK_IDENT a)   == (TK_IDENT b)   = a == b
+  (TK_STRING a)  == (TK_STRING b)  = a == b
+  (TK_HASH a)    == (TK_HASH b)    = a == b
+  (TK_NUMBER a)  == (TK_NUMBER b)  = a == b
+  (TK_BOOL a)    == (TK_BOOL b)    = a == b
+  TK_LBRACE      == TK_LBRACE      = True
+  TK_RBRACE      == TK_RBRACE      = True
+  TK_COLON       == TK_COLON       = True
+  TK_EQUALS      == TK_EQUALS      = True
+  TK_EOF         == TK_EOF         = True
+  _              == _              = False
+
+||| TOKEN: a token kind tagged with where it was found.
+public export
+record Token where
+  constructor MkToken
+  kind : TokenKind
+  loc  : SourceLoc
 
 --------------------------------------------------------------------------------
 -- Integrity Models
@@ -56,6 +94,50 @@ record Attestation where
   hash      : Hash
   timestamp : Bits64
   signer    : Maybe String
+
+||| @manifest header: project identity metadata.
+public export
+record ManifestSection where
+  constructor MkManifestSection
+  name    : String
+  version : String
+
+||| A single integrity reference: a name bound to a hash digest.
+public export
+record Ref where
+  constructor MkRef
+  refName : String
+  refHash : Hash
+
+||| @refs body: the list of integrity references.
+public export
+record RefsSection where
+  constructor MkRefsSection
+  entries : List Ref
+
+||| @attestation body: a signed claim about the manifest.
+public export
+record AttestationSection where
+  constructor MkAttestationSection
+  claim : Attestation
+
+||| Enforcement strictness requested by a manifest.
+public export
+data PolicyMode = PolicyLax | PolicyChecked | PolicyAttested
+
+public export
+Eq PolicyMode where
+  PolicyLax      == PolicyLax      = True
+  PolicyChecked  == PolicyChecked  = True
+  PolicyAttested == PolicyAttested = True
+  _              == _              = False
+
+||| @policy body: enforcement rules.
+public export
+record PolicySection where
+  constructor MkPolicySection
+  mode       : PolicyMode
+  requireSig : Bool
 
 ||| MANIFEST: The complete multi-section integrity specification.
 public export

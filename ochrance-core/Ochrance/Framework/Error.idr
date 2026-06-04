@@ -63,9 +63,39 @@ record OchranceError where
   priority : Priority
   zone     : ImpactZone
 
+||| Render each diagnostic axis.
+public export
+showPriority : Priority -> String
+showPriority Info     = "INFO"
+showPriority Warning  = "WARN"
+showPriority Error    = "ERROR"
+showPriority Critical = "CRITICAL"
+
+public export
+showQuery : QueryDiagnostic -> String
+showQuery (MissingStructure name)      = "missing-structure: " ++ name
+showQuery (HashMismatch field exp act) = "hash-mismatch: " ++ field
+                                       ++ " expected=" ++ exp ++ " actual=" ++ act
+showQuery (InvariantViolation inv)     = "invariant-violation: " ++ inv
+showQuery (ParseFailure ctx line col)  = "parse-failure: " ++ ctx
+                                       ++ " @ " ++ show line ++ ":" ++ show col
+
+public export
+showZone : ImpactZone -> String
+showZone (SingleBlock path)   = "block:" ++ path
+showZone (FullSubsystem name) = "subsystem:" ++ name
+showZone (CrossCutting subs)  = "cross-cutting:" ++ show subs
+
 ||| SERIALIZATION: Produces a standardized error string: "[PRIORITY] q | z".
 public export
 showError : OchranceError -> String
 showError err = "[" ++ showPriority err.priority ++ "] "
              ++ showQuery err.query ++ " | "
              ++ showZone err.zone
+
+||| Smart constructor for a hash-mismatch error (a Checked/Attested failure).
+public export
+hashError : (field : String) -> (expected : String) -> (actual : String)
+         -> ImpactZone -> OchranceError
+hashError field expected actual zone =
+  MkError (HashMismatch field expected actual) Error zone

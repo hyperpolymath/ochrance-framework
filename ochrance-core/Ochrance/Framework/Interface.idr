@@ -17,6 +17,17 @@ import Ochrance.Framework.Progressive
 %default total
 
 --------------------------------------------------------------------------------
+-- Snapshots
+--------------------------------------------------------------------------------
+
+||| An opaque, subsystem-agnostic snapshot blob. Each subsystem decodes the
+||| payload according to its own on-disk format (see `Filesystem.Repair`).
+public export
+record Snapshot where
+  constructor MkSnapshot
+  payload : List Bits8
+
+--------------------------------------------------------------------------------
 -- VerifiedSubsystem Interface
 --------------------------------------------------------------------------------
 
@@ -51,12 +62,18 @@ interface VerifiedSubsystem (sub : Type) where
 ||| fails, it automatically executes a repair from the provided snapshot 
 ||| and re-verifies the result.
 public export
-verifyOrRepair : VerifiedSubsystem sub
+verifyOrRepair : {sub : Type}
+              -> VerifiedSubsystem sub
               => (mode : VerificationMode)
               -> (state : SubState {sub})
               -> (manifest : SubManifest {sub})
               -> Snapshot
               -> IO (Either OchranceError (SubState {sub}, VerificationProof mode (SubState {sub}) (SubManifest {sub})))
 verifyOrRepair mode state manifest snap =
-  -- ... [Pipeline implementation]
-  pure (Right (state, proof))
+  case verify mode state manifest of
+    Right ok => pure (Right (state, ok))
+    Left _ => do
+      repaired <- repair state snap
+      case verify mode repaired manifest of
+        Right ok  => pure (Right (repaired, ok))
+        Left  err => pure (Left err)
