@@ -30,7 +30,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - language: javascript-typescript
+          # This repo is Idris2/Rust/C with no JS/TS sources, so CodeQL's
+          # javascript-typescript extractor errored ("no code found"). Analyse
+          # the GitHub Actions workflows instead (matches the ochrance repo).
+          - language: actions
             build-mode: none
 
     steps:
