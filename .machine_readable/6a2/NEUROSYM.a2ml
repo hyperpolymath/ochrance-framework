@@ -1,143 +1,55 @@
 # SPDX-License-Identifier: MPL-2.0
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 #
-# NEUROSYM.a2ml — Neurosymbolic integration metadata for Ochrance Framework
-# Configuration for Hypatia scanning, Echidna integration, and symbolic reasoning.
-
+# NEUROSYM.a2ml — Neurosymbolic integration metadata
+# Configuration for Hypatia scanning and symbolic reasoning.
 [metadata]
 version = "0.1.0"
-last-updated = "2026-02-19"
+last-updated = "2026-06-05"
 
 [hypatia-config]
 scan-enabled = true
-scan-depth = "deep"     # quick | standard | deep (deep for formal verification projects)
+scan-depth = "deep"     # deep: formal verification project; stricter thresholds
 report-format = "logtalk"
-scan-languages = ["idris2", "c", "rust", "julia"]
+scan-languages = [ "idris2", "c", ]
+
+[symbolic]
+prover = "Idris2 (dependent types) — stubs in this repo; discharged proofs in ochrance"
+neural-backend = "ECHIDNA (Rust/Julia) — ADR-005; Idris2 as 13th backend (planned)"
+abstraction = "idris2-echidna prover layer (planned)"
+
+[proof-obligations]
+# This repo defines obligations/contracts; discharged proofs live in ochrance.
+# See docs/PROOF-NEEDS.md and docs/ARCHITECTURE.md for the authoritative obligation list.
+obligations-defined-here = [
+  "VerifiedSubsystem interface contract — mode-indexed, subsystem-parameterised (harvested into ochrance per D1)",
+  "A2ML grammar invertibility — parse ∘ serialise = id (spec in docs/A2ML-SPEC.md)",
+  "L4 policy soundness — Policy Governor enforces system integrity only (spec in docs/L4-POLICIES.md)",
+  "C NVMe shim memory-safety — no UB, no OOB (obligation in PROOF-NEEDS.md; tool: Frama-C or CBMC)",
+]
+# discharged proofs (live in ochrance, not here):
+discharged-in-ochrance = [
+  "merkleCorrectWith — combiner-generic inclusion soundness",
+  "verifyProofReconstructsWith — verify ≡ root == reconstruct",
+  "roundtripManifest — grammar invertibility over the reference token codec",
+  "progressive assurance (SatisfiesMinimum / attestedSatisfiesLax)",
+]
+# open obligations (tracked in ochrance's proof campaign):
+open = [
+  "buildMerkleTree correctness + IO↔pure bridge (ochrance Stage 1)",
+  "CollisionResistant h + merkleBinding / D2 (ochrance Stage 3–4)",
+  "C NVMe shim formal memory-safety proof (this repo; Frama-C/CBMC)",
+]
 
 [symbolic-rules]
-# Custom symbolic rules for Ochrance — stricter than standard due to formal verification focus
-
-[[symbolic-rules.rule]]
-name = "no-believe-me"
-pattern = "believe_me"
-severity = "critical"
-language = "idris2"
-description = "believe_me bypasses the type checker entirely; banned in all Ochrance code"
-
-[[symbolic-rules.rule]]
-name = "no-assert-total"
-pattern = "assert_total"
-severity = "critical"
-language = "idris2"
-description = "assert_total claims totality without proof; banned in verification framework"
-
-[[symbolic-rules.rule]]
-name = "no-assert-smaller"
-pattern = "assert_smaller"
-severity = "critical"
-language = "idris2"
-description = "assert_smaller claims structural decrease without proof; banned"
-
-[[symbolic-rules.rule]]
-name = "no-unsafe-perform-io"
-pattern = "unsafePerformIO"
-severity = "critical"
-language = "idris2"
-description = "unsafePerformIO breaks referential transparency; banned"
-
-[[symbolic-rules.rule]]
-name = "no-postulate-in-proofs"
-pattern = "%default total"
-severity = "info"
-language = "idris2"
-description = "Ensure %default total is set in all proof modules (informational check)"
-
-[[symbolic-rules.rule]]
-name = "no-unsafe-rust"
-pattern = "unsafe\\s*\\{"
-severity = "high"
-language = "rust"
-description = "Unsafe blocks in Rust require SAFETY comments; flag for review"
-
-[[symbolic-rules.rule]]
-name = "c-ffi-bounds-check"
-pattern = "memcpy|strcpy|strcat|sprintf"
-severity = "critical"
-language = "c"
-description = "Unsafe C string/memory functions; use bounded alternatives (strncpy, snprintf)"
-
-[neural-config]
-# Neural pattern detection settings for Ochrance
-confidence-threshold = 0.90  # Higher threshold for formal verification project
-model = "hypatia-v2"
-
-[echidna-integration]
-# Configuration for Echidna neurosymbolic theorem proving integration
-enabled = true
-status = "planned"  # planned | active | production
-
-[echidna-integration.proof-dispatch]
-description = "Ochrance generates proof obligations from VerifiedSubsystem interface; dispatches to Echidna"
-format = "idris2-obligations"  # Structured proof obligation format
-dispatch-protocol = "file-based"  # file-based | grpc | graphql (file-based initially)
-confidence-minimum = 0.85  # Minimum Echidna confidence score to accept synthesised proof
-
-[echidna-integration.backend]
-# Idris2 as Echidna prover backend (ADR-005)
-backend-name = "idris2-ochrance"
-description = "Dedicated Idris2 backend for Ochrance proof obligations"
-tier = 1  # Tier 1: Interactive proof assistant
-capabilities = [
-  "Dependent type checking with totality",
-  "Linear types via Quantitative Type Theory (QTT)",
-  "Custom tactic synthesis via Echidna neural layer",
-  "Cross-checking against Agda, Lean, Coq via portfolio solving",
+# Proof-escape checks: no dangerous patterns permitted
+rules = [
+  "no-believe-me — believe_me bypasses type checker; banned",
+  "no-assert-total — assert_total claims totality without proof; banned",
+  "no-assert-smaller — assert_smaller claims structural decrease without proof; banned",
+  "no-unsafe-perform-io — unsafePerformIO breaks referential transparency; banned",
+  "c-ffi-bounds-check — unsafe C string/memory functions (memcpy/strcpy/sprintf) require bounded alternatives",
 ]
 
-[echidna-integration.neural-synthesis]
-description = "Julia ML layer synthesises Idris2 tactics from proof state"
-pipeline = [
-  "1. Ochrance emits proof obligation (goal type + context)",
-  "2. Echidna encodes obligation as feature vector",
-  "3. Julia ML model predicts candidate tactics (logistic regression, future: Transformer)",
-  "4. Idris2 backend type-checks candidate tactic applications",
-  "5. Trust pipeline scores result (integrity, certificates, confidence)",
-  "6. Ochrance receives synthesised proof with confidence metadata",
-]
-training-data-source = "Idris2 stdlib + Ochrance proof corpus (future)"
-
-[idris2-type-proofs]
-# Type-level proof patterns used in Ochrance
-description = "Ochrance leverages Idris2 dependent types for compile-time subsystem verification"
-
-[[idris2-type-proofs.pattern]]
-name = "VerifiedSubsystem"
-description = "Core interface: subsystems must provide proof witnesses for integrity properties"
-example = "interface VerifiedSubsystem (sub : Type) where verify : sub -> Either VerificationError (Proof sub)"
-
-[[idris2-type-proofs.pattern]]
-name = "StrictnessLevel"
-description = "Progressive strictness: Lax (runtime), Checked (compile-time), Attested (cryptographic)"
-example = "data StrictnessLevel = Lax | Checked | Attested"
-
-[[idris2-type-proofs.pattern]]
-name = "Proof witness"
-description = "Proof witnesses carry evidence of verification at the type level"
-example = "data Proof : (sub : Type) -> Type where MkProof : (evidence : VerificationEvidence) -> Proof sub"
-
-[[idris2-type-proofs.pattern]]
-name = "Attestation"
-description = "Attested proofs include cryptographic signatures over verification evidence"
-example = "record Attestation where constructor MkAttestation; proof : Proof sub; signature : Signature; timestamp : UTCTime"
-
-[verification-pipeline]
-# How neurosymbolic verification flows through the system
-stages = [
-  { name = "obligation-generation", tool = "ochrance-core", description = "Extract proof obligations from VerifiedSubsystem implementations" },
-  { name = "neural-synthesis", tool = "echidna", description = "Synthesise candidate proofs via neural tactic prediction" },
-  { name = "type-checking", tool = "idris2", description = "Verify synthesised proofs via Idris2 totality checker" },
-  { name = "cross-verification", tool = "echidna-portfolio", description = "Cross-check via Agda/Lean/Coq backends" },
-  { name = "trust-scoring", tool = "echidna-trust", description = "Assign 5-level trust score to verification result" },
-  { name = "attestation", tool = "ochrance-core", description = "Generate cryptographic attestation (Attested level only)" },
-  { name = "reporting", tool = "hypatia", description = "Emit Logtalk facts for CI/CD intelligence" },
-]
+[honest-bounds]
+notes = """This repo's Idris2 code is interface stubs and framework scaffolding — no production proofs originate here (D1). The discharged theorems (Merkle soundness, A2ML roundtrip, progressive assurance) live in ochrance. The C NVMe shim is a thin syscall wrapper; formal memory-safety remains an open obligation."""
