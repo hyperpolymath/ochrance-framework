@@ -1,84 +1,80 @@
 # SPDX-License-Identifier: MPL-2.0
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 #
-# STATE.a2ml — Project state checkpoint for Ochrance Framework
-# Modular verification framework for subsystem integrity using dependent types.
-
+# STATE.a2ml — Ochránce Framework project state checkpoint
 [metadata]
 project = "ochrance-framework"
 version = "0.1.0"
-last-updated = "2026-02-19"
-status = "active"  # active | paused | archived
+last-updated = "2026-06-05"
+status = "active"
+session = "machine-readable checkpoint — 2026-06-05"
 
 [project-context]
-name = "Ochrance"
-full-name = "Ochrance Framework"
-name-origin = "Czech: ochrance = protector, defender, guardian"
-purpose = "Modular verification framework for subsystem integrity using dependent types (Idris2)"
-completion-percentage = 5
+name = "Ochránce Framework"
+purpose = """Architecture, documentation, and specification repository for the Ochránce neurosymbolic verification system. Defines the 6-layer L0–L5 trust pyramid, the A2ML spec, the FFI contract, the threat model, the whitepaper, L4 policies, and the roadmap. The framework's duplicate ochrance-core has been retired (D1): canonical proofs and code live in the ochrance repo. The framework's genuinely novel contribution — the mode-indexed, subsystem-parameterised VerifiedSubsystem interface (VerificationProof mode SubState SubManifest) — has been harvested into ochrance."""
+completion-percentage = 65
 
 [position]
-phase = "design"           # design | implementation | testing | maintenance | archived
+phase = "maintenance"   # design | implementation | testing | maintenance | archived
 maturity = "experimental"  # experimental | alpha | beta | production | lts
 
-[route-to-mvp]
-milestones = [
-  { name = "Architecture", completion = 100, description = "Architecture documents and design decisions finalised" },
-  { name = "A2ML Spec", completion = 80, description = "A2ML parser specification and format definition" },
-  { name = "Framework Interface", completion = 30, description = "VerifiedSubsystem interface, Proof witnesses, core types" },
-  { name = "Filesystem Module", completion = 0, description = "Reference implementation (thesis scope): filesystem integrity verification" },
-  { name = "Echidna Integration", completion = 0, description = "Add Idris2 as 13th prover backend to Echidna; neural proof synthesis" },
-  { name = "Benchmarks", completion = 0, description = "Performance benchmarks for verification overhead" },
-  { name = "Thesis", completion = 0, description = "Academic thesis documenting the framework design and evaluation" },
+[what-this-repo-owns]
+# The framework is a documentation + architecture repo. Its value is:
+owns = [
+  "docs/ARCHITECTURE.md — L0–L5 trust pyramid specification",
+  "docs/A2ML-SPEC.md — Attestation & Audit Markup Language specification",
+  "docs/FFI-CONTRACT.md — FFI contract between Idris2 and C/Zig layers",
+  "docs/THREAT-MODEL.md — Threat model for subsystem verification",
+  "docs/WHITEPAPER.md — Academic white paper draft",
+  "docs/L4-POLICIES.md — Policy Governor boundary specification",
+  "docs/ROADMAP.md — 4-phase implementation roadmap (Q1–Q4 2026)",
+  "modules/{filesystem,memory,network,crypto}/ — module-level docs",
+  "ffi/c/ — thin C NVMe syscall shims (~300 lines, L1 layer)",
+]
+retired = [
+  "ochrance-core/ — duplicate core retired (D1); canonical source lives in ochrance repo",
 ]
 
+[proven-surface]
+# The framework defines proof obligations/contracts; the discharged proofs live in ochrance.
+# No machine-checked proofs originate here; obligation definitions are in docs/ and ochrance-core/ stubs.
+notes = """Proof obligations are specified in docs/ARCHITECTURE.md and PROOF-NEEDS.md.
+Machine-checked theorems are discharged in the ochrance repo (merkleCorrectWith,
+roundtripManifest, progressive assurance, ABI Handle invariant, etc.).
+The framework's Idris2 stubs type-check clean (0 dangerous patterns per 2026-05-26 audit)."""
+
 [blockers-and-issues]
-# Current blockers preventing progress
-critical = []
-high = [
-  "Idris2 ABI stability: upstream API may change before 1.0",
-  "Echidna integration requires stable ochrance-core interface first",
-]
-medium = [
-  "OSTree integration design not yet started",
-  "C FFI shim layer needs memory safety review pattern",
-  "Julia neural synthesis pipeline architecture not finalised",
-]
-low = [
-  "Memory module (Idris2 + Rust) deferred to post-thesis",
-  "Network module (Idris2 + eBPF) deferred to post-thesis",
-  "Crypto module (HACL* linking) deferred to post-thesis",
+issues = [
+  "ochrance-core in this repo is a stub duplicate — retired per D1; code changes go to ochrance",
+  "C NVMe shim (ffi/c/nvme_shim.h) has no formal memory-safety proof — Frama-C/CBMC recommended (PROOF-NEEDS.md)",
+  "rsr-template scaffold (ai/, compliance/, configs/, policies/, scripts/, 0.1-AI-MANIFEST, ENSAID_CONFIG, root README, root-allow.txt) is a separate blocked task — not yet applied",
+  "ochrance.ipkg present for legacy compatibility; primary build authority is ochrance repo",
 ]
 
 [critical-next-actions]
-immediate = [
-  "Define VerifiedSubsystem interface in Idris2",
-  "Define Proof witness types and StrictnessLevel (Lax/Checked/Attested)",
-  "Implement A2ML parser in Idris2",
-]
-this-week = [
-  "Create ochrance-core/ochrance.ipkg package descriptor",
-  "Stub out modules/filesystem/ directory structure",
-  "Draft Echidna integration architecture (ADR-005)",
-]
-this-month = [
-  "Implement filesystem module skeleton with property specifications",
-  "Begin Idris2 backend integration in Echidna",
-  "Set up CI/CD pipeline with Hypatia scanning",
+actions = [
+  "Keep docs/ as the primary maintenance surface (architecture, A2ML spec, FFI contract, threat model, policies)",
+  "Track ochrance's proof-campaign progress in ECOSYSTEM and NEUROSYM; update when stages close",
+  "Apply rsr-template scaffold when template access is unblocked (separate task)",
+  "Retire or clearly tombstone ochrance-core/ with a redirect to ochrance",
 ]
 
-[ecosystem]
-part-of = ["RSR Framework", "hyperpolymath verification stack"]
-depends-on = ["echidna", "hypatia", "gitbot-fleet"]
-
-[session-history]
-session = "2026-02-19 initial-setup"
-summary = "Created machine-readable SCM files for ochrance-framework"
-changes = [
-  "Wrote STATE.a2ml with project milestones and current status",
-  "Wrote META.a2ml with architecture decisions ADR-001 through ADR-005",
-  "Wrote ECOSYSTEM.a2ml with ecosystem position and integrations",
-  "Wrote AGENTIC.a2ml with AI agent interaction patterns",
-  "Wrote NEUROSYM.a2ml with neurosymbolic integration config",
-  "Wrote PLAYBOOK.a2ml with operational runbook",
+[recent-history]
+# 2026-06-05 machine-readable checkpoint
+decisions = [
+  "D1 — core retirement: ochrance-framework's duplicate ochrance-core retired; mode-indexed VerifiedSubsystem Interface harvested into ochrance",
 ]
+merged = [
+  "#15 — bump a2ml-validate-action to 6bff6ec (s-expression form support)",
+  "#14 — fix fake action SHA pins to canonical real SHAs",
+  "#13 — replace scorecard.yml with reusable wrapper",
+  "#12 — replace secret-scanner.yml with reusable wrapper",
+  "#10 — record tech-debt audit findings (2026-05-26)",
+  "feat: implement A2ML lexer/parser/validator/serializer",
+  "fix: compile Framework core + Filesystem subsystem",
+]
+
+[maintenance-status]
+last-run-utc = "2026-06-05T14:08:00Z"
+last-result = "pass"  # unknown | pass | warn | fail
+notes = "CI green. Proof-debt markers: 0 (2026-05-26 audit). Licence: MPL-2.0 ok. Docs: 18 files / 5711 LoC. Core stubs type-check clean."

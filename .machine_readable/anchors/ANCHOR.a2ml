@@ -16,3 +16,19 @@ ssg:
 # Relationships
 parents:
   - "org.hyperpolymath.boj-server"
+
+# Realignments — significant repository realignments on record
+realignments:
+  - date: "2026-06-05"
+    kind: "core-retirement + role-clarification"
+    summary: >
+      D1: ochrance-framework's duplicate ochrance-core is retired as the
+      source of proof truth. Canonical proofs and production verification code
+      live in the ochrance repo. The framework's original contribution —
+      the mode-indexed, subsystem-parameterised VerifiedSubsystem interface
+      (VerificationProof mode SubState SubManifest) — has been harvested into
+      ochrance. This repo retains its genuine value: the architecture
+      specification, A2ML spec, FFI contract, threat model, whitepaper,
+      L4 policies, and roadmap. The 6-layer L0–L5 trust pyramid definition
+      remains here as the authoritative architectural document.
+    authority: "docs/ARCHITECTURE.md"
