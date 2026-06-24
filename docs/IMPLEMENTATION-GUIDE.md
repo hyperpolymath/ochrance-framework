@@ -1,5 +1,5 @@
 <!--
-SPDX-License-Identifier: MPL-2.0
+SPDX-License-Identifier: CC-BY-SA-4.0
 Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 -->
 <!-- Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk> -->
@@ -222,7 +222,7 @@ ochrance-framework/
 
 ```idris
 -- src/core/Ochrance/A2ML/Types.idr
--- SPDX-License-Identifier: MPL-2.0
+-- SPDX-License-Identifier: CC-BY-SA-4.0
 
 module Ochrance.A2ML.Types
 
@@ -302,7 +302,7 @@ record ParseError where
 
 ```idris
 -- src/core/Ochrance/A2ML/Parser.idr
--- SPDX-License-Identifier: MPL-2.0
+-- SPDX-License-Identifier: CC-BY-SA-4.0
 
 module Ochrance.A2ML.Parser
 
@@ -390,7 +390,7 @@ parseA2ML input =
 
 ```idris
 -- src/core/Ochrance/A2ML/Serialiser.idr
--- SPDX-License-Identifier: MPL-2.0
+-- SPDX-License-Identifier: CC-BY-SA-4.0
 
 module Ochrance.A2ML.Serialiser
 
@@ -424,7 +424,7 @@ serialiseField indent (Block k fields) =
 
 ```idris
 -- tests/core/TestA2MLRoundTrip.idr
--- SPDX-License-Identifier: MPL-2.0
+-- SPDX-License-Identifier: CC-BY-SA-4.0
 
 module TestA2MLRoundTrip
 
@@ -465,7 +465,7 @@ prop_roundTrip = property $ do
 
 ```idris
 -- src/core/Ochrance/Hash.idr
--- SPDX-License-Identifier: MPL-2.0
+-- SPDX-License-Identifier: CC-BY-SA-4.0
 
 module Ochrance.Hash
 
@@ -497,7 +497,7 @@ DecEq (Hash algo) where
 
 ```idris
 -- src/core/Ochrance/Ephapax.idr
--- SPDX-License-Identifier: MPL-2.0
+-- SPDX-License-Identifier: CC-BY-SA-4.0
 
 module Ochrance.Ephapax
 
@@ -541,7 +541,7 @@ applyRepair (MkEphapax action) = do
 
 ```idris
 -- src/core/Ochrance/Core.idr
--- SPDX-License-Identifier: MPL-2.0
+-- SPDX-License-Identifier: CC-BY-SA-4.0
 
 module Ochrance.Core
 
@@ -618,7 +618,7 @@ interface Monad m => VerifiedSubsystem (m : Type -> Type) where
 
 ```c
 /* ochrance_shim.c -- Ochrance L1 C shim layer
- * SPDX-License-Identifier: MPL-2.0
+ * SPDX-License-Identifier: CC-BY-SA-4.0
  * Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath)
  *
  * This file is intentionally minimal (~200 lines).
@@ -690,7 +690,7 @@ int nvme_write_block(int fd, uint64_t lba, const void *buf, size_t len) {
 
 ```makefile
 # modules/filesystem/shim/Makefile
-# SPDX-License-Identifier: MPL-2.0
+# SPDX-License-Identifier: CC-BY-SA-4.0
 
 CC      = gcc
 CFLAGS  = -Wall -Wextra -Werror -O2 -fPIC -std=c11
@@ -721,7 +721,7 @@ test: $(TARGET)
 
 ```idris
 -- modules/filesystem/Ochrance/Filesystem/NVMe.idr
--- SPDX-License-Identifier: MPL-2.0
+-- SPDX-License-Identifier: CC-BY-SA-4.0
 
 module Ochrance.Filesystem.NVMe
 
@@ -778,7 +778,7 @@ readBlock dev offset = do
 
 ```idris
 -- src/core/Ochrance/Merkle.idr
--- SPDX-License-Identifier: MPL-2.0
+-- SPDX-License-Identifier: CC-BY-SA-4.0
 
 module Ochrance.Merkle
 
@@ -842,7 +842,7 @@ data Complete : MerkleTree d algo -> List (Hash algo) -> Type where
 
 ```idris
 -- src/tui/Ochrance/TUI/Diagnostics.idr
--- SPDX-License-Identifier: MPL-2.0
+-- SPDX-License-Identifier: CC-BY-SA-4.0
 
 module Ochrance.TUI.Diagnostics
 
@@ -890,7 +890,7 @@ formatDiagnostic diag =
 
 ```toml
 # echidna/Cargo.toml
-# SPDX-License-Identifier: MPL-2.0
+# SPDX-License-Identifier: CC-BY-SA-4.0
 
 [package]
 name = "ochrance-echidna"
@@ -910,7 +910,7 @@ thiserror = "2"
 
 ```rust
 // echidna/src/idris2_backend/ast.rs
-// SPDX-License-Identifier: MPL-2.0
+// SPDX-License-Identifier: CC-BY-SA-4.0
 
 use serde::{Deserialize, Serialize};
 
@@ -1001,7 +1001,7 @@ pub enum Pattern {
 
 ```rust
 // echidna/src/idris2_backend/templates.rs
-// SPDX-License-Identifier: MPL-2.0
+// SPDX-License-Identifier: CC-BY-SA-4.0
 
 use crate::idris2_backend::ast::*;
 
@@ -1045,7 +1045,7 @@ pub fn timestamp_monotonicity_template() -> IdrisTerm {
 
 ```rust
 // echidna/src/bridge/api.rs
-// SPDX-License-Identifier: MPL-2.0
+// SPDX-License-Identifier: CC-BY-SA-4.0
 
 use crate::idris2_backend::ast::IdrisTerm;
 use crate::idris2_backend::codegen::generate_idris2;
@@ -1128,7 +1128,7 @@ pub fn verify_with_idris2(proof_source: &str) -> Result<bool, String> {
 
 ```toml
 # neural/Project.toml
-# SPDX-License-Identifier: MPL-2.0
+# SPDX-License-Identifier: CC-BY-SA-4.0
 
 name = "OchranceNeural"
 uuid = "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
@@ -1146,7 +1146,7 @@ CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 
 ```julia
 # neural/src/data/corpus.jl
-# SPDX-License-Identifier: MPL-2.0
+# SPDX-License-Identifier: CC-BY-SA-4.0
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath)
 
 """
@@ -1238,7 +1238,7 @@ end # module
 
 ```julia
 # neural/src/model/architecture.jl
-# SPDX-License-Identifier: MPL-2.0
+# SPDX-License-Identifier: CC-BY-SA-4.0
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath)
 
 """
@@ -1310,7 +1310,7 @@ end # module
 
 ```dockerfile
 # Containerfile
-# SPDX-License-Identifier: MPL-2.0
+# SPDX-License-Identifier: CC-BY-SA-4.0
 # Build stage: compile Ochrance from source
 FROM cgr.dev/chainguard/wolfi-base:latest AS build
 
@@ -1338,7 +1338,7 @@ ENTRYPOINT ["/usr/local/bin/ochrance"]
 
 ```just
 # Justfile
-# SPDX-License-Identifier: MPL-2.0
+# SPDX-License-Identifier: CC-BY-SA-4.0
 
 # Build the C shim shared library
 build-shim:
@@ -1398,7 +1398,7 @@ proof-check:
 
 ```idris
 -- benchmarks/bench_merkle.idr
--- SPDX-License-Identifier: MPL-2.0
+-- SPDX-License-Identifier: CC-BY-SA-4.0
 
 module BenchMerkle
 
