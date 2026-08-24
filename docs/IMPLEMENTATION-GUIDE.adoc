@@ -1,50 +1,52 @@
-<!--
-SPDX-License-Identifier: CC-BY-SA-4.0
-Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
--->
-<!-- Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk> -->
+== Ochrance Framework – Claude Code Implementation Guide
 
-# Ochrance Framework -- Claude Code Implementation Guide
+____
+*Version:* 1.0.0-draft *Last updated:* 2026-02-19 *Author:* Jonathan
+D.A. Jewell, The Open University *Purpose:* Week-by-week development
+plan with code templates, test specifications, and command references.
+____
 
-> **Version:** 1.0.0-draft
-> **Last updated:** 2026-02-19
-> **Author:** Jonathan D.A. Jewell, The Open University
-> **Purpose:** Week-by-week development plan with code templates, test
-> specifications, and command references.
+'''''
 
----
+=== Table of Contents
 
-## Table of Contents
+[arabic]
+. link:#1-prerequisites[Prerequisites]
+. link:#2-project-file-structure[Project File Structure]
+. link:#3-phase-1-ochrance-core-weeks-1-12[Phase 1: Ochrance Core (Weeks
+1-12)]
+. link:++#4-phase-2-echidna--idris2-backend-weeks-13-18++[Phase 2:
+ECHIDNA + Idris2 Backend (Weeks 13-18)]
+. link:#5-phase-3-neural-synthesis-weeks-19-26[Phase 3: Neural Synthesis
+(Weeks 19-26)]
+. link:#6-phase-4-production-and-thesis-weeks-27-38[Phase 4: Production
+and Thesis (Weeks 27-38)]
+. link:#7-test-specifications[Test Specifications]
+. link:#8-command-reference[Command Reference]
+. link:#9-troubleshooting[Troubleshooting]
 
-1. [Prerequisites](#1-prerequisites)
-2. [Project File Structure](#2-project-file-structure)
-3. [Phase 1: Ochrance Core (Weeks 1-12)](#3-phase-1-ochrance-core-weeks-1-12)
-4. [Phase 2: ECHIDNA + Idris2 Backend (Weeks 13-18)](#4-phase-2-echidna--idris2-backend-weeks-13-18)
-5. [Phase 3: Neural Synthesis (Weeks 19-26)](#5-phase-3-neural-synthesis-weeks-19-26)
-6. [Phase 4: Production and Thesis (Weeks 27-38)](#6-phase-4-production-and-thesis-weeks-27-38)
-7. [Test Specifications](#7-test-specifications)
-8. [Command Reference](#8-command-reference)
-9. [Troubleshooting](#9-troubleshooting)
+'''''
 
----
+=== 1. Prerequisites
 
-## 1. Prerequisites
+==== 1.1 Required Software
 
-### 1.1 Required Software
+[cols=",,",options="header",]
+|===
+|Software |Version |Installation
+|Idris2 |>= 0.7.0 |`+pack install idris2+` or build from source
+|GCC |>= 12 |`+dnf install gcc+` (Fedora)
+|libnvme |>= 1.0 |`+dnf install libnvme-devel+`
+|Rust |nightly |`+asdf install rust nightly+`
+|Julia |>= 1.10 |`+asdf install julia 1.10+`
+|Podman |>= 4.0 |`+dnf install podman+`
+|just |>= 1.0 |`+cargo install just+`
+|===
 
-| Software | Version | Installation |
-|----------|---------|-------------|
-| Idris2 | >= 0.7.0 | `pack install idris2` or build from source |
-| GCC | >= 12 | `dnf install gcc` (Fedora) |
-| libnvme | >= 1.0 | `dnf install libnvme-devel` |
-| Rust | nightly | `asdf install rust nightly` |
-| Julia | >= 1.10 | `asdf install julia 1.10` |
-| Podman | >= 4.0 | `dnf install podman` |
-| just | >= 1.0 | `cargo install just` |
+==== 1.2 Idris2 Setup
 
-### 1.2 Idris2 Setup
-
-```bash
+[source,bash]
+----
 # Install Idris2 via pack (recommended)
 git clone https://github.com/stefan-hoeck/idris2-pack.git
 cd idris2-pack
@@ -57,11 +59,12 @@ idris2 --version
 # Install Idris2 libraries needed by Ochrance
 pack install hedgehog   # property-based testing
 pack install elab-util  # elaboration utilities
-```
+----
 
-### 1.3 Development Environment
+==== 1.3 Development Environment
 
-```bash
+[source,bash]
+----
 # Clone the repository (canonical location)
 cd ~/Documents/hyperpolymath-repos
 # ochrance-framework should already exist
@@ -73,13 +76,14 @@ ls ochrance-framework/
 # Set up the Justfile
 cd ochrance-framework
 just --list
-```
+----
 
-### 1.4 NVMe Test Setup
+==== 1.4 NVMe Test Setup
 
 For development and testing without real NVMe hardware:
 
-```bash
+[source,bash]
+----
 # Create a loopback NVMe target using nvmet
 # (Requires root; use in a VM or test machine)
 sudo modprobe nvmet
@@ -94,13 +98,13 @@ sudo bash -c 'echo /tmp/ochrance-test.img > /sys/kernel/config/nvmet/subsystems/
 # Alternative: use a file-backed block device for simpler testing
 dd if=/dev/zero of=/tmp/ochrance-test.img bs=1M count=1024
 sudo losetup /dev/loop0 /tmp/ochrance-test.img
-```
+----
 
----
+'''''
 
-## 2. Project File Structure
+=== 2. Project File Structure
 
-```
+....
 ochrance-framework/
 ├── src/
 │   ├── abi/                         # Idris2 ABI definitions (existing)
@@ -203,24 +207,25 @@ ochrance-framework/
 ├── Justfile                         # Build commands
 ├── Containerfile                    # Container build
 └── ochrance.ipkg                    # Top-level Idris2 package
-```
+....
 
----
+'''''
 
-## 3. Phase 1: Ochrance Core (Weeks 1-12)
+=== 3. Phase 1: Ochrance Core (Weeks 1-12)
 
-### Week 1: A2ML Tokeniser
+==== Week 1: A2ML Tokeniser
 
-**Goal:** Implement the A2ML tokeniser that converts raw text into tokens.
+*Goal:* Implement the A2ML tokeniser that converts raw text into tokens.
 
-**Files to create:**
+*Files to create:*
 
-- `src/core/Ochrance/A2ML/Types.idr`
-- `src/core/Ochrance/A2ML/Lexer.idr` (optional, or inline in Parser)
+* `+src/core/Ochrance/A2ML/Types.idr+`
+* `+src/core/Ochrance/A2ML/Lexer.idr+` (optional, or inline in Parser)
 
-**Code template:**
+*Code template:*
 
-```idris
+[source,idris]
+----
 -- src/core/Ochrance/A2ML/Types.idr
 -- SPDX-License-Identifier: CC-BY-SA-4.0
 
@@ -278,29 +283,31 @@ record ParseError where
   column   : Nat
   expected : String
   found    : String
-```
+----
 
-**Tests:**
+*Tests:*
 
-```idris
+[source,idris]
+----
 -- tests/core/TestA2MLParser.idr (stub)
 -- TODO: Test that tokeniser handles all value types
 -- TODO: Test that tokeniser rejects null bytes
 -- TODO: Test that tokeniser handles UTF-8 correctly
 -- TODO: Test error messages include line numbers
-```
+----
 
-### Week 2: A2ML Parser (Recursive Descent)
+==== Week 2: A2ML Parser (Recursive Descent)
 
-**Goal:** Implement the recursive descent parser for A2ML documents.
+*Goal:* Implement the recursive descent parser for A2ML documents.
 
-**Files to create:**
+*Files to create:*
 
-- `src/core/Ochrance/A2ML/Parser.idr`
+* `+src/core/Ochrance/A2ML/Parser.idr+`
 
-**Code template:**
+*Code template:*
 
-```idris
+[source,idris]
+----
 -- src/core/Ochrance/A2ML/Parser.idr
 -- SPDX-License-Identifier: CC-BY-SA-4.0
 
@@ -366,29 +373,30 @@ parseA2ML input =
                         pure (MkDocument header sections)) state of
        Left err => Left err
        Right (doc, _) => Right doc
-```
+----
 
-**Tests to write:**
+*Tests to write:*
 
-- Parse a minimal valid document (manifest + refs only).
-- Parse a document with all five sections.
-- Reject a document missing the header.
-- Reject a document with an unknown hash algorithm.
-- Reject a document exceeding the 16 MiB size limit.
-- Reject a document with nesting depth > 8.
+* Parse a minimal valid document (manifest + refs only).
+* Parse a document with all five sections.
+* Reject a document missing the header.
+* Reject a document with an unknown hash algorithm.
+* Reject a document exceeding the 16 MiB size limit.
+* Reject a document with nesting depth > 8.
 
-### Week 3: A2ML Serialiser and Round-Trip Tests
+==== Week 3: A2ML Serialiser and Round-Trip Tests
 
-**Goal:** Implement the A2ML serialiser and verify round-trip property.
+*Goal:* Implement the A2ML serialiser and verify round-trip property.
 
-**Files to create:**
+*Files to create:*
 
-- `src/core/Ochrance/A2ML/Serialiser.idr`
-- `tests/core/TestA2MLRoundTrip.idr`
+* `+src/core/Ochrance/A2ML/Serialiser.idr+`
+* `+tests/core/TestA2MLRoundTrip.idr+`
 
-**Code template:**
+*Code template:*
 
-```idris
+[source,idris]
+----
 -- src/core/Ochrance/A2ML/Serialiser.idr
 -- SPDX-License-Identifier: CC-BY-SA-4.0
 
@@ -418,11 +426,12 @@ serialiseField indent (KeyValue k v) =
 serialiseField indent (Block k fields) =
   -- TODO: indent ++ key ++ " {\n" ++ fields ++ indent ++ "}\n"
   ?serialiseField_block_todo
-```
+----
 
-**Round-trip property test:**
+*Round-trip property test:*
 
-```idris
+[source,idris]
+----
 -- tests/core/TestA2MLRoundTrip.idr
 -- SPDX-License-Identifier: CC-BY-SA-4.0
 
@@ -447,23 +456,24 @@ prop_roundTrip = property $ do
   case parseA2ML serialised of
     Left err  => failWith Nothing ("Parse failed: " ++ show err)
     Right doc' => doc === doc'
-```
+----
 
-### Weeks 3-5: VerifiedSubsystem Interface
+==== Weeks 3-5: VerifiedSubsystem Interface
 
-**Goal:** Define the core framework types and interfaces.
+*Goal:* Define the core framework types and interfaces.
 
-**Files to create:**
+*Files to create:*
 
-- `src/core/Ochrance/Hash.idr`
-- `src/core/Ochrance/State.idr`
-- `src/core/Ochrance/Core.idr`
-- `src/core/Ochrance/Ephapax.idr`
-- `src/core/Ochrance/Policy.idr`
+* `+src/core/Ochrance/Hash.idr+`
+* `+src/core/Ochrance/State.idr+`
+* `+src/core/Ochrance/Core.idr+`
+* `+src/core/Ochrance/Ephapax.idr+`
+* `+src/core/Ochrance/Policy.idr+`
 
-**Code template -- Hash.idr:**
+*Code template – Hash.idr:*
 
-```idris
+[source,idris]
+----
 -- src/core/Ochrance/Hash.idr
 -- SPDX-License-Identifier: CC-BY-SA-4.0
 
@@ -491,11 +501,12 @@ data Hash : HashAlgo -> Type where
 public export
 DecEq (Hash algo) where
   decEq (MkHash xs) (MkHash ys) = ?decEqHash_todo
-```
+----
 
-**Code template -- Ephapax.idr:**
+*Code template – Ephapax.idr:*
 
-```idris
+[source,idris]
+----
 -- src/core/Ochrance/Ephapax.idr
 -- SPDX-License-Identifier: CC-BY-SA-4.0
 
@@ -535,11 +546,12 @@ applyRepair (MkEphapax action) = do
   -- TODO: Perform the repair action
   -- TODO: This is the ONLY way to consume the token
   ?applyRepair_todo
-```
+----
 
-**Code template -- Core.idr:**
+*Code template – Core.idr:*
 
-```idris
+[source,idris]
+----
 -- src/core/Ochrance/Core.idr
 -- SPDX-License-Identifier: CC-BY-SA-4.0
 
@@ -597,26 +609,28 @@ interface Monad m => VerifiedSubsystem (m : Type -> Type) where
 
   ||| Subsystem-specific health check
   healthCheck : m HealthStatus
-```
+----
 
-### Weeks 5-10: Filesystem Module
+==== Weeks 5-10: Filesystem Module
 
-**Goal:** Implement the filesystem module as the VerifiedSubsystem reference.
+*Goal:* Implement the filesystem module as the VerifiedSubsystem
+reference.
 
-**Files to create:**
+*Files to create:*
 
-- `modules/filesystem/shim/ochrance_shim.h`
-- `modules/filesystem/shim/ochrance_shim.c`
-- `modules/filesystem/shim/Makefile`
-- `modules/filesystem/Ochrance/Filesystem/NVMe.idr`
-- `modules/filesystem/Ochrance/Filesystem/Smart.idr`
-- `modules/filesystem/Ochrance/Filesystem/Module.idr`
-- `modules/filesystem/Ochrance/Filesystem/Snapshot.idr`
-- `modules/filesystem/Ochrance/Filesystem/Repair.idr`
+* `+modules/filesystem/shim/ochrance_shim.h+`
+* `+modules/filesystem/shim/ochrance_shim.c+`
+* `+modules/filesystem/shim/Makefile+`
+* `+modules/filesystem/Ochrance/Filesystem/NVMe.idr+`
+* `+modules/filesystem/Ochrance/Filesystem/Smart.idr+`
+* `+modules/filesystem/Ochrance/Filesystem/Module.idr+`
+* `+modules/filesystem/Ochrance/Filesystem/Snapshot.idr+`
+* `+modules/filesystem/Ochrance/Filesystem/Repair.idr+`
 
-**Code template -- ochrance_shim.c:**
+*Code template – ochrance_shim.c:*
 
-```c
+[source,c]
+----
 /* ochrance_shim.c -- Ochrance L1 C shim layer
  * SPDX-License-Identifier: CC-BY-SA-4.0
  * Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath)
@@ -684,11 +698,12 @@ int nvme_write_block(int fd, uint64_t lba, const void *buf, size_t len) {
     if (ret < 0) return -errno;
     return 0;
 }
-```
+----
 
-**Code template -- Makefile:**
+*Code template – Makefile:*
 
-```makefile
+[source,makefile]
+----
 # modules/filesystem/shim/Makefile
 # SPDX-License-Identifier: CC-BY-SA-4.0
 
@@ -704,22 +719,23 @@ SRC     = ochrance_shim.c
 all: $(TARGET)
 
 $(TARGET): $(SRC) ochrance_shim.h
-	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+    $(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
 clean:
-	rm -f $(TARGET)
+    rm -f $(TARGET)
 
 install: $(TARGET)
-	install -Dm755 $(TARGET) /usr/local/lib/$(TARGET)
+    install -Dm755 $(TARGET) /usr/local/lib/$(TARGET)
 
 test: $(TARGET)
-	@echo "C shim tests require nvmet loopback target"
-	@echo "See docs/IMPLEMENTATION-GUIDE.md for NVMe test setup"
-```
+    @echo "C shim tests require nvmet loopback target"
+    @echo "See docs/IMPLEMENTATION-GUIDE.md for NVMe test setup"
+----
 
-**Code template -- NVMe.idr (FFI bindings):**
+*Code template – NVMe.idr (FFI bindings):*
 
-```idris
+[source,idris]
+----
 -- modules/filesystem/Ochrance/Filesystem/NVMe.idr
 -- SPDX-License-Identifier: CC-BY-SA-4.0
 
@@ -772,11 +788,12 @@ readBlock dev offset = do
   -- TODO: Call prim__nvmeReadBlock
   -- TODO: Convert result
   ?readBlock_todo
-```
+----
 
-**Code template -- Merkle.idr:**
+*Code template – Merkle.idr:*
 
-```idris
+[source,idris]
+----
 -- src/core/Ochrance/Merkle.idr
 -- SPDX-License-Identifier: CC-BY-SA-4.0
 
@@ -832,15 +849,16 @@ buildTree hashes =
 public export
 data Complete : MerkleTree d algo -> List (Hash algo) -> Type where
   -- TODO: Define completeness proof structure
-```
+----
 
-### Weeks 10-12: TUI and Telemetry
+==== Weeks 10-12: TUI and Telemetry
 
-**Goal:** Implement the user-facing diagnostic layer.
+*Goal:* Implement the user-facing diagnostic layer.
 
-**Code template -- Diagnostics.idr:**
+*Code template – Diagnostics.idr:*
 
-```idris
+[source,idris]
+----
 -- src/tui/Ochrance/TUI/Diagnostics.idr
 -- SPDX-License-Identifier: CC-BY-SA-4.0
 
@@ -871,24 +889,25 @@ formatDiagnostic diag =
                  P => "[p] "  -- yellow in TUI
                  Z => "[z] "  -- red in TUI
   in prefix ++ diag.code ++ ": " ++ diag.message
-```
+----
 
----
+'''''
 
-## 4. Phase 2: ECHIDNA + Idris2 Backend (Weeks 13-18)
+=== 4. Phase 2: ECHIDNA + Idris2 Backend (Weeks 13-18)
 
-### Weeks 13-15: Idris2 AST and Code Generator
+==== Weeks 13-15: Idris2 AST and Code Generator
 
-**Files to create:**
+*Files to create:*
 
-- `echidna/src/idris2_backend/ast.rs`
-- `echidna/src/idris2_backend/codegen.rs`
-- `echidna/src/idris2_backend/templates.rs`
-- `echidna/Cargo.toml`
+* `+echidna/src/idris2_backend/ast.rs+`
+* `+echidna/src/idris2_backend/codegen.rs+`
+* `+echidna/src/idris2_backend/templates.rs+`
+* `+echidna/Cargo.toml+`
 
-**Code template -- Cargo.toml:**
+*Code template – Cargo.toml:*
 
-```toml
+[source,toml]
+----
 # echidna/Cargo.toml
 # SPDX-License-Identifier: CC-BY-SA-4.0
 
@@ -904,11 +923,12 @@ license = "MPL-2.0"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "2"
-```
+----
 
-**Code template -- ast.rs:**
+*Code template – ast.rs:*
 
-```rust
+[source,rust]
+----
 // echidna/src/idris2_backend/ast.rs
 // SPDX-License-Identifier: CC-BY-SA-4.0
 
@@ -993,13 +1013,14 @@ pub enum Pattern {
     /// Variable pattern
     VarPat(String),
 }
-```
+----
 
-### Weeks 15-17: Proof Search Integration
+==== Weeks 15-17: Proof Search Integration
 
-**Code template -- templates.rs:**
+*Code template – templates.rs:*
 
-```rust
+[source,rust]
+----
 // echidna/src/idris2_backend/templates.rs
 // SPDX-License-Identifier: CC-BY-SA-4.0
 
@@ -1037,13 +1058,14 @@ pub fn timestamp_monotonicity_template() -> IdrisTerm {
     // TODO: Generate comparison proof
     IdrisTerm::Hole("timestamp_monotonicity_todo".to_string())
 }
-```
+----
 
-### Week 18: Ochrance-ECHIDNA Bridge
+==== Week 18: Ochrance-ECHIDNA Bridge
 
-**Code template -- bridge/api.rs:**
+*Code template – bridge/api.rs:*
 
-```rust
+[source,rust]
+----
 // echidna/src/bridge/api.rs
 // SPDX-License-Identifier: CC-BY-SA-4.0
 
@@ -1110,23 +1132,24 @@ pub fn verify_with_idris2(proof_source: &str) -> Result<bool, String> {
 
     Ok(output.status.success())
 }
-```
+----
 
----
+'''''
 
-## 5. Phase 3: Neural Synthesis (Weeks 19-26)
+=== 5. Phase 3: Neural Synthesis (Weeks 19-26)
 
-### Weeks 19-22: Training Data Pipeline
+==== Weeks 19-22: Training Data Pipeline
 
-**Files to create:**
+*Files to create:*
 
-- `neural/Project.toml`
-- `neural/src/data/corpus.jl`
-- `neural/src/data/features.jl`
+* `+neural/Project.toml+`
+* `+neural/src/data/corpus.jl+`
+* `+neural/src/data/features.jl+`
 
-**Code template -- Project.toml:**
+*Code template – Project.toml:*
 
-```toml
+[source,toml]
+----
 # neural/Project.toml
 # SPDX-License-Identifier: CC-BY-SA-4.0
 
@@ -1140,11 +1163,12 @@ Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
 Transformers = "21ca0261-441d-5571-ada7-03e74c0159d4"
 JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
-```
+----
 
-**Code template -- corpus.jl:**
+*Code template – corpus.jl:*
 
-```julia
+[source,julia]
+----
 # neural/src/data/corpus.jl
 # SPDX-License-Identifier: CC-BY-SA-4.0
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath)
@@ -1230,13 +1254,14 @@ function build_corpus(;
 end
 
 end # module
-```
+----
 
-### Weeks 22-26: Neural Model and Verification Loop
+==== Weeks 22-26: Neural Model and Verification Loop
 
-**Code template -- architecture.jl:**
+*Code template – architecture.jl:*
 
-```julia
+[source,julia]
+----
 # neural/src/model/architecture.jl
 # SPDX-License-Identifier: CC-BY-SA-4.0
 # Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath)
@@ -1298,17 +1323,18 @@ function beam_search(model, goal_tokens::Vector{Int};
 end
 
 end # module
-```
+----
 
----
+'''''
 
-## 6. Phase 4: Production and Thesis (Weeks 27-38)
+=== 6. Phase 4: Production and Thesis (Weeks 27-38)
 
-### Weeks 27-32: Production Hardening
+==== Weeks 27-32: Production Hardening
 
-**Containerfile template:**
+*Containerfile template:*
 
-```dockerfile
+[source,dockerfile]
+----
 # Containerfile
 # SPDX-License-Identifier: CC-BY-SA-4.0
 # Build stage: compile Ochrance from source
@@ -1332,11 +1358,12 @@ COPY --from=build /build/shim/libochrance_shim.so /usr/local/lib/
 # TODO: Copy compiled Idris2 binary
 
 ENTRYPOINT ["/usr/local/bin/ochrance"]
-```
+----
 
-**Justfile recipes:**
+*Justfile recipes:*
 
-```just
+[source,just]
+----
 # Justfile
 # SPDX-License-Identifier: CC-BY-SA-4.0
 
@@ -1390,13 +1417,14 @@ security-scan:
 # Run echidna proofing
 proof-check:
     echidna proof . --output /tmp/ochrance-proofs.json
-```
+----
 
-### Weeks 30-34: Evaluation
+==== Weeks 30-34: Evaluation
 
-**Benchmark specification:**
+*Benchmark specification:*
 
-```idris
+[source,idris]
+----
 -- benchmarks/bench_merkle.idr
 -- SPDX-License-Identifier: CC-BY-SA-4.0
 
@@ -1419,67 +1447,119 @@ benchMerkleConstruction = do
     end <- clockTime Monotonic
     let elapsed = timeDifference end start
     putStrLn $ "n=" ++ show n ++ " time=" ++ show elapsed ++ "ns"
-```
+----
 
----
+'''''
 
-## 7. Test Specifications
+=== 7. Test Specifications
 
-### 7.1 Unit Tests
+==== 7.1 Unit Tests
 
-| Test ID | Module | Description | Expected Result |
-|---------|--------|-------------|-----------------|
-| T001 | A2ML Parser | Parse minimal valid document | `Right doc` |
-| T002 | A2ML Parser | Parse document with all sections | `Right doc` |
-| T003 | A2ML Parser | Reject document without header | `Left (ParseError ...)` |
-| T004 | A2ML Parser | Reject document with null bytes | `Left (ParseError ...)` |
-| T005 | A2ML Parser | Reject document > 16 MiB | `Left (SizeExceeded ...)` |
-| T006 | A2ML Parser | Reject nesting depth > 8 | `Left (NestingExceeded ...)` |
-| T007 | A2ML Round-trip | `parse (serialise doc) == Right doc` | Property holds for 10000 random docs |
-| T008 | Hash | SHA-256 of known input matches expected output | Exact match |
-| T009 | Hash | SHA3-256 of known input matches expected output | Exact match |
-| T010 | Hash | BLAKE3 of known input matches expected output | Exact match |
-| T011 | Merkle | Build tree from 1 hash | Leaf node |
-| T012 | Merkle | Build tree from 2 hashes | Depth-1 tree |
-| T013 | Merkle | Build tree from 1024 hashes | Depth-10 tree |
-| T014 | Merkle | Inclusion proof for leaf 0 | Verified |
-| T015 | Merkle | Inclusion proof for last leaf | Verified |
-| T016 | Merkle | Inclusion proof with wrong hash | Rejected |
-| T017 | Ephapax | Consume token exactly once | Compiles |
-| T018 | Ephapax | Attempt to consume token twice | Compile error (linear) |
-| T019 | Ephapax | Attempt to ignore token | Compile error (linear) |
-| T020 | Policy | Composed AllOf with all passing | `Yes prf` |
-| T021 | Policy | Composed AllOf with one failing | `No contra` |
-| T022 | Policy | Composed AnyOf with one passing | `Yes prf` |
-| T023 | Policy | Composed AnyOf with none passing | `No contra` |
+[width="100%",cols="20%,17%,27%,36%",options="header",]
+|===
+|Test ID |Module |Description |Expected Result
+|T001 |A2ML Parser |Parse minimal valid document |`+Right doc+`
 
-### 7.2 Integration Tests
+|T002 |A2ML Parser |Parse document with all sections |`+Right doc+`
 
-| Test ID | Description | Setup | Expected Result |
-|---------|-------------|-------|-----------------|
-| I001 | Full verification of 1 GB filesystem | nvmet loopback | VerifiedState with valid Merkle root |
-| I002 | Detect single bit flip | Inject corruption, verify | `P` diagnostic with block ID |
-| I003 | Detect metadata corruption | Modify inode, verify | `Z` diagnostic with repair action |
-| I004 | Repair from CoW snapshot | Corrupt block, repair | Block restored, `Q` diagnostic |
-| I005 | A2ML attestation round-trip | Verify, serialise, parse, re-verify | Identical VerifiedState |
-| I006 | SMART health degradation | Simulate via dm-flakey | `P` diagnostic with wear prediction |
+|T003 |A2ML Parser |Reject document without header
+|`+Left (ParseError ...)+`
 
-### 7.3 Fuzz Tests
+|T004 |A2ML Parser |Reject document with null bytes
+|`+Left (ParseError ...)+`
 
-| Fuzz Target | Input | Goal |
-|-------------|-------|------|
-| A2ML parser | Random bytes | No crashes, no undefined behaviour |
-| A2ML parser | Mutated valid documents | No crashes, graceful error handling |
-| NVMe FFI | Random ioctl responses | No memory corruption, proper error propagation |
-| Merkle construction | Random hash lists | Correct tree structure, no panics |
+|T005 |A2ML Parser |Reject document > 16 MiB
+|`+Left (SizeExceeded ...)+`
 
----
+|T006 |A2ML Parser |Reject nesting depth > 8
+|`+Left (NestingExceeded ...)+`
 
-## 8. Command Reference
+|T007 |A2ML Round-trip |`+parse (serialise doc) == Right doc+` |Property
+holds for 10000 random docs
 
-### 8.1 Idris2 Commands
+|T008 |Hash |SHA-256 of known input matches expected output |Exact match
 
-```bash
+|T009 |Hash |SHA3-256 of known input matches expected output |Exact
+match
+
+|T010 |Hash |BLAKE3 of known input matches expected output |Exact match
+
+|T011 |Merkle |Build tree from 1 hash |Leaf node
+
+|T012 |Merkle |Build tree from 2 hashes |Depth-1 tree
+
+|T013 |Merkle |Build tree from 1024 hashes |Depth-10 tree
+
+|T014 |Merkle |Inclusion proof for leaf 0 |Verified
+
+|T015 |Merkle |Inclusion proof for last leaf |Verified
+
+|T016 |Merkle |Inclusion proof with wrong hash |Rejected
+
+|T017 |Ephapax |Consume token exactly once |Compiles
+
+|T018 |Ephapax |Attempt to consume token twice |Compile error (linear)
+
+|T019 |Ephapax |Attempt to ignore token |Compile error (linear)
+
+|T020 |Policy |Composed AllOf with all passing |`+Yes prf+`
+
+|T021 |Policy |Composed AllOf with one failing |`+No contra+`
+
+|T022 |Policy |Composed AnyOf with one passing |`+Yes prf+`
+
+|T023 |Policy |Composed AnyOf with none passing |`+No contra+`
+|===
+
+==== 7.2 Integration Tests
+
+[width="100%",cols="21%,28%,15%,36%",options="header",]
+|===
+|Test ID |Description |Setup |Expected Result
+|I001 |Full verification of 1 GB filesystem |nvmet loopback
+|VerifiedState with valid Merkle root
+
+|I002 |Detect single bit flip |Inject corruption, verify |`+P+`
+diagnostic with block ID
+
+|I003 |Detect metadata corruption |Modify inode, verify |`+Z+`
+diagnostic with repair action
+
+|I004 |Repair from CoW snapshot |Corrupt block, repair |Block restored,
+`+Q+` diagnostic
+
+|I005 |A2ML attestation round-trip |Verify, serialise, parse, re-verify
+|Identical VerifiedState
+
+|I006 |SMART health degradation |Simulate via dm-flakey |`+P+`
+diagnostic with wear prediction
+|===
+
+==== 7.3 Fuzz Tests
+
+[width="100%",cols="51%,26%,23%",options="header",]
+|===
+|Fuzz Target |Input |Goal
+|A2ML parser |Random bytes |No crashes, no undefined behaviour
+
+|A2ML parser |Mutated valid documents |No crashes, graceful error
+handling
+
+|NVMe FFI |Random ioctl responses |No memory corruption, proper error
+propagation
+
+|Merkle construction |Random hash lists |Correct tree structure, no
+panics
+|===
+
+'''''
+
+=== 8. Command Reference
+
+==== 8.1 Idris2 Commands
+
+[source,bash]
+----
 # Type-check a module without building
 idris2 --check src/core/Ochrance/Core.idr
 
@@ -1494,11 +1574,12 @@ idris2 --repl --package ochrance-core
 
 # Generate documentation
 idris2 --mkdoc src/core/ochrance-core.ipkg
-```
+----
 
-### 8.2 C Shim Commands
+==== 8.2 C Shim Commands
 
-```bash
+[source,bash]
+----
 # Build the shared library
 cd modules/filesystem/shim
 make
@@ -1511,11 +1592,12 @@ cppcheck --enable=all --std=c11 ochrance_shim.c
 
 # (Optional) Formal verification with Frama-C
 frama-c -wp ochrance_shim.c
-```
+----
 
-### 8.3 Rust Commands (ECHIDNA backend)
+==== 8.3 Rust Commands (ECHIDNA backend)
 
-```bash
+[source,bash]
+----
 # Build the ECHIDNA backend
 cd echidna
 cargo build --release
@@ -1525,11 +1607,12 @@ cargo test
 
 # Run with logging
 RUST_LOG=debug cargo run
-```
+----
 
-### 8.4 Julia Commands (Neural synthesis)
+==== 8.4 Julia Commands (Neural synthesis)
 
-```bash
+[source,bash]
+----
 # Activate the project environment
 cd neural
 julia --project=. -e 'using Pkg; Pkg.instantiate()'
@@ -1542,11 +1625,12 @@ julia --project=. src/model/training.jl
 
 # Run synthesis benchmarks
 julia --project=. src/verify/benchmark.jl
-```
+----
 
-### 8.5 Container Commands
+==== 8.5 Container Commands
 
-```bash
+[source,bash]
+----
 # Build the container image
 podman build -t ochrance-framework:latest -f Containerfile .
 
@@ -1555,53 +1639,57 @@ podman run --device=/dev/nvme0n1 ochrance-framework:latest verify /dev/nvme0n1
 
 # Sign the container image
 cerro-torre sign ochrance-framework:latest
-```
+----
 
----
+'''''
 
-## 9. Troubleshooting
+=== 9. Troubleshooting
 
-### 9.1 Idris2 Issues
+==== 9.1 Idris2 Issues
 
-**Problem:** `Can't find package ochrance-core`
+*Problem:* `+Can't find package ochrance-core+`
 
-**Solution:** Ensure the `.ipkg` file is in the correct location and the
-`IDRIS2_PACKAGE_PATH` environment variable includes the build directory:
+*Solution:* Ensure the `+.ipkg+` file is in the correct location and the
+`+IDRIS2_PACKAGE_PATH+` environment variable includes the build
+directory:
 
-```bash
+[source,bash]
+----
 export IDRIS2_PACKAGE_PATH=/var$REPOS_DIR/ochrance-framework/src/core/build/ttc
-```
+----
 
-**Problem:** `Linear variable used non-linearly`
+*Problem:* `+Linear variable used non-linearly+`
 
-**Solution:** This is Idris2 enforcing linear types (which is correct
-behaviour). Check that the Ephapax token is consumed exactly once. Common
-mistakes:
+*Solution:* This is Idris2 enforcing linear types (which is correct
+behaviour). Check that the Ephapax token is consumed exactly once.
+Common mistakes:
 
-- Using the token in both branches of an `if-then-else` (only one branch
-  executes, so this is non-linear).
-- Passing the token to a function and also using it afterward.
-- Pattern matching on the token without consuming it.
+* Using the token in both branches of an `+if-then-else+` (only one
+branch executes, so this is non-linear).
+* Passing the token to a function and also using it afterward.
+* Pattern matching on the token without consuming it.
 
-**Problem:** `idris2: out of memory`
+*Problem:* `+idris2: out of memory+`
 
-**Solution:** Idris2 can use significant memory for complex types. Try:
+*Solution:* Idris2 can use significant memory for complex types. Try:
 
-```bash
+[source,bash]
+----
 # Increase stack size
 ulimit -s unlimited
 
 # Use Chez Scheme backend (default, most memory-efficient)
 idris2 --cg chez --build ochrance-core.ipkg
-```
+----
 
-### 9.2 C Shim Issues
+==== 9.2 C Shim Issues
 
-**Problem:** `nvme_read_smart: Permission denied`
+*Problem:* `+nvme_read_smart: Permission denied+`
 
-**Solution:** NVMe device access requires elevated privileges:
+*Solution:* NVMe device access requires elevated privileges:
 
-```bash
+[source,bash]
+----
 # Option 1: Run with capabilities (preferred)
 sudo setcap cap_sys_rawio+ep /usr/local/bin/ochrance
 
@@ -1610,25 +1698,27 @@ sudo ochrance verify /dev/nvme0n1
 
 # Option 3: Use nvmet loopback (testing)
 # See Section 1.4 for setup instructions
-```
+----
 
-**Problem:** `error while loading shared libraries: libochrance_shim.so`
+*Problem:* `+error while loading shared libraries: libochrance_shim.so+`
 
-**Solution:** The shared library is not in the library path:
+*Solution:* The shared library is not in the library path:
 
-```bash
+[source,bash]
+----
 # Option 1: Install to system path
 sudo make install  # in modules/filesystem/shim/
 
 # Option 2: Set LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=/var$REPOS_DIR/ochrance-framework/modules/filesystem/shim:$LD_LIBRARY_PATH
-```
+----
 
-**Problem:** `libnvme.h: No such file or directory`
+*Problem:* `+libnvme.h: No such file or directory+`
 
-**Solution:** Install the libnvme development package:
+*Solution:* Install the libnvme development package:
 
-```bash
+[source,bash]
+----
 # Fedora
 sudo dnf install libnvme-devel
 
@@ -1637,101 +1727,149 @@ sudo apt install libnvme-dev
 
 # Arch
 sudo pacman -S libnvme
-```
+----
 
-### 9.3 ECHIDNA Backend Issues
+==== 9.3 ECHIDNA Backend Issues
 
-**Problem:** `Idris2 type-check failed for generated proof`
+*Problem:* `+Idris2 type-check failed for generated proof+`
 
-**Solution:** This is expected for some neural candidates. The verification
-loop will try up to 16 candidates. If all fail:
+*Solution:* This is expected for some neural candidates. The
+verification loop will try up to 16 candidates. If all fail:
 
-1. Check the proof goal is well-typed by compiling it separately.
-2. Check that the context (available hypotheses) is complete.
-3. Fall back to symbolic proof search (slower but more reliable).
-4. Report the goal to VeriSimDB as a "hard" goal for future training.
+[arabic]
+. Check the proof goal is well-typed by compiling it separately.
+. Check that the context (available hypotheses) is complete.
+. Fall back to symbolic proof search (slower but more reliable).
+. Report the goal to VeriSimDB as a "`hard`" goal for future training.
 
-### 9.4 Neural Synthesis Issues
+==== 9.4 Neural Synthesis Issues
 
-**Problem:** `CUDA out of memory` during training
+*Problem:* `+CUDA out of memory+` during training
 
-**Solution:** Reduce batch size or model dimensions:
+*Solution:* Reduce batch size or model dimensions:
 
-```julia
+[source,julia]
+----
 config = ModelConfig(
     d_model = 256,         # reduced from 512
     dim_feedforward = 1024, # reduced from 2048
 )
-```
+----
 
 Or use gradient checkpointing:
 
-```julia
+[source,julia]
+----
 Flux.train!(loss, params, opt; cb = Flux.throttle(gc, 60))
-```
+----
 
-**Problem:** `Low synthesis success rate (< 50%)`
+*Problem:* `+Low synthesis success rate (< 50%)+`
 
-**Solution:**
+*Solution:*
 
-1. Increase training data (more proof samples from symbolic search).
-2. Use data augmentation (proof term transformations).
-3. Increase beam width (try 32 or 64 instead of 16).
-4. Check that the tokeniser vocabulary covers Ochrance-specific identifiers.
-5. Fine-tune on domain-specific proofs (filesystem properties only).
+[arabic]
+. Increase training data (more proof samples from symbolic search).
+. Use data augmentation (proof term transformations).
+. Increase beam width (try 32 or 64 instead of 16).
+. Check that the tokeniser vocabulary covers Ochrance-specific
+identifiers.
+. Fine-tune on domain-specific proofs (filesystem properties only).
 
----
+'''''
 
-## Appendix A: Weekly Milestone Summary
+=== Appendix A: Weekly Milestone Summary
 
-| Week | Phase | Milestone | Key Deliverable |
-|------|-------|-----------|-----------------|
-| 1 | P1 | A2ML Tokeniser | `Ochrance.A2ML.Types` module |
-| 2 | P1 | A2ML Parser | `Ochrance.A2ML.Parser` module |
-| 3 | P1 | A2ML Serialiser + Round-trip | Property-based tests passing |
-| 4 | P1 | VerifiedSubsystem interface | `Ochrance.Core` module |
-| 5 | P1 | VerifiedState + Hash types | `Ochrance.State`, `Ochrance.Hash` modules |
-| 6 | P1 | Ephapax + Policy | `Ochrance.Ephapax`, `Ochrance.Policy` modules |
-| 7 | P1 | C shims | `libochrance_shim.so` built and tested |
-| 8 | P1 | FFI bindings | `Ochrance.Filesystem.NVMe` module |
-| 9 | P1 | Merkle tree construction | `Ochrance.Merkle` with proofs |
-| 10 | P1 | Filesystem module | `Ochrance.Filesystem.Module` complete |
-| 11 | P1 | TUI framework | `Ochrance.TUI.Main` with q/p/z |
-| 12 | P1 | Telemetry + integration tests | JSON-lines, OTel, end-to-end passing |
-| 13 | P2 | Idris2 AST | `ast.rs` complete |
-| 14 | P2 | Code generator | `codegen.rs` generating valid Idris2 |
-| 15 | P2 | Proof templates | Common patterns as templates |
-| 16 | P2 | Proof search strategy | ECHIDNA tactic engine extended |
-| 17 | P2 | VeriSimDB integration | Proof caching operational |
-| 18 | P2 | Ochrance-ECHIDNA bridge | End-to-end proof request working |
-| 19 | P3 | Corpus extraction | Training data from Idris2 stdlib |
-| 20 | P3 | Feature engineering | Proof term features computed |
-| 21 | P3 | Data augmentation | 3x corpus via transformations |
-| 22 | P3 | Model architecture | Transformer built in Flux.jl |
-| 23 | P3 | Training pipeline | Model training on GPU |
-| 24 | P3 | Beam search decoding | Candidate generation working |
-| 25 | P3 | Verification loop | Neural + Idris2 type-checker |
-| 26 | P3 | Synthesis benchmarks | Performance metrics recorded |
-| 27 | P4 | Security audit | C shim audit report |
-| 28 | P4 | Fuzzing campaign | AFL++ findings triaged |
-| 29 | P4 | Performance optimisation | Parallel Merkle tree |
-| 30 | P4 | Evaluation: correctness | 100% corruption detection |
-| 31 | P4 | Evaluation: performance | Benchmark results tabulated |
-| 32 | P4 | Evaluation: neural quality | Synthesis metrics recorded |
-| 33 | P4 | Thesis: intro + background | Chapters 1-2 drafted |
-| 34 | P4 | Thesis: architecture + impl | Chapters 3-4 drafted |
-| 35 | P4 | Thesis: evaluation + discussion | Chapters 5-6 drafted |
-| 36 | P4 | Thesis: revision | Complete draft reviewed |
-| 37 | P4 | Thesis: final edits | Submission-ready |
-| 38 | P4 | Submission + release | Thesis submitted, code released |
+[width="100%",cols="16%,17%,26%,41%",options="header",]
+|===
+|Week |Phase |Milestone |Key Deliverable
+|1 |P1 |A2ML Tokeniser |`+Ochrance.A2ML.Types+` module
 
----
+|2 |P1 |A2ML Parser |`+Ochrance.A2ML.Parser+` module
 
-## Appendix B: Idris2 Package Files
+|3 |P1 |A2ML Serialiser + Round-trip |Property-based tests passing
 
-### ochrance-core.ipkg
+|4 |P1 |VerifiedSubsystem interface |`+Ochrance.Core+` module
 
-```ipkg
+|5 |P1 |VerifiedState + Hash types |`+Ochrance.State+`,
+`+Ochrance.Hash+` modules
+
+|6 |P1 |Ephapax + Policy |`+Ochrance.Ephapax+`, `+Ochrance.Policy+`
+modules
+
+|7 |P1 |C shims |`+libochrance_shim.so+` built and tested
+
+|8 |P1 |FFI bindings |`+Ochrance.Filesystem.NVMe+` module
+
+|9 |P1 |Merkle tree construction |`+Ochrance.Merkle+` with proofs
+
+|10 |P1 |Filesystem module |`+Ochrance.Filesystem.Module+` complete
+
+|11 |P1 |TUI framework |`+Ochrance.TUI.Main+` with q/p/z
+
+|12 |P1 |Telemetry + integration tests |JSON-lines, OTel, end-to-end
+passing
+
+|13 |P2 |Idris2 AST |`+ast.rs+` complete
+
+|14 |P2 |Code generator |`+codegen.rs+` generating valid Idris2
+
+|15 |P2 |Proof templates |Common patterns as templates
+
+|16 |P2 |Proof search strategy |ECHIDNA tactic engine extended
+
+|17 |P2 |VeriSimDB integration |Proof caching operational
+
+|18 |P2 |Ochrance-ECHIDNA bridge |End-to-end proof request working
+
+|19 |P3 |Corpus extraction |Training data from Idris2 stdlib
+
+|20 |P3 |Feature engineering |Proof term features computed
+
+|21 |P3 |Data augmentation |3x corpus via transformations
+
+|22 |P3 |Model architecture |Transformer built in Flux.jl
+
+|23 |P3 |Training pipeline |Model training on GPU
+
+|24 |P3 |Beam search decoding |Candidate generation working
+
+|25 |P3 |Verification loop |Neural + Idris2 type-checker
+
+|26 |P3 |Synthesis benchmarks |Performance metrics recorded
+
+|27 |P4 |Security audit |C shim audit report
+
+|28 |P4 |Fuzzing campaign |AFL++ findings triaged
+
+|29 |P4 |Performance optimisation |Parallel Merkle tree
+
+|30 |P4 |Evaluation: correctness |100% corruption detection
+
+|31 |P4 |Evaluation: performance |Benchmark results tabulated
+
+|32 |P4 |Evaluation: neural quality |Synthesis metrics recorded
+
+|33 |P4 |Thesis: intro + background |Chapters 1-2 drafted
+
+|34 |P4 |Thesis: architecture + impl |Chapters 3-4 drafted
+
+|35 |P4 |Thesis: evaluation + discussion |Chapters 5-6 drafted
+
+|36 |P4 |Thesis: revision |Complete draft reviewed
+
+|37 |P4 |Thesis: final edits |Submission-ready
+
+|38 |P4 |Submission + release |Thesis submitted, code released
+|===
+
+'''''
+
+=== Appendix B: Idris2 Package Files
+
+==== ochrance-core.ipkg
+
+[source,ipkg]
+----
 -- src/core/ochrance-core.ipkg
 package ochrance-core
 version = 0.1.0
@@ -1753,11 +1891,12 @@ modules = Ochrance.Core
         , Ochrance.A2ML.Parser
         , Ochrance.A2ML.Serialiser
         , Ochrance.A2ML.Validate
-```
+----
 
-### ochrance-filesystem.ipkg
+==== ochrance-filesystem.ipkg
 
-```ipkg
+[source,ipkg]
+----
 -- modules/filesystem/ochrance-filesystem.ipkg
 package ochrance-filesystem
 version = 0.1.0
@@ -1777,4 +1916,4 @@ modules = Ochrance.Filesystem.Module
 
 opts = "--cg chez"
 libs = ochrance_shim
-```
+----
