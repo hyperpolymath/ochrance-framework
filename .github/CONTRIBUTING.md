@@ -5,7 +5,7 @@ cd ochrance-framework
 
 # Using Guix (recommended for reproducibility)
 
-guix develop
+guix shell
 
 # Or using toolbox/distrobox
 
